@@ -3,9 +3,12 @@
  * Útil para o uso em contêiners heterogêneos.
  *
  * Esta classe suporta objetos de dois tipos apenas, especifiados
- * via templates. A classe está especializada para o caso
- * de os dois tipos especificados serem o mesmo; para informações
- * sobre semântica, consulte cada método individualmente.
+ * via templates. Objetos desta classe sempre conterão um elemento
+ * válido, de algum dos dois tipos.
+ *
+ * A classe está especializada para o caso de os dois tipos
+ * especificados serem o mesmo; para informações sobre semântica,
+ * consulte cada método individualmente.
  *
  * Por enquanto, há suporte apenas a tipos POD.
  */
@@ -29,7 +32,9 @@ public:
     Either( const U& u );
 
     /* Construtor padrão; inicializa a classe como contendo o tipo T,
-     * com o valor nulo deste tipo. */
+     * com o valor nulo deste tipo.
+     *
+     * Equivalente a Either( T() ). */
     Either();
 
     /* Atribuição de qualquer dos dois tipos de objeto.
