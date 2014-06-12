@@ -47,6 +47,20 @@ namespace Test {
         return false;
     }
 
+    bool testEquals( char actualValue, char expectedValue,
+            const char * lineText, int lineNumber )
+    {
+        if( actualValue == expectedValue )
+            return true;
+
+        printf( "%s\nat line %i - "
+                "Actual: '%c' (0x%X) - Expected: '%c' (0x%X)\n\n",
+                lineText, lineNumber,
+                actualValue, (int) actualValue,
+                expectedValue, (int) expectedValue );
+        return false;
+    }
+
     bool testEquals( const char * actualValue, const char * expectedValue,
             const char * lineText, int lineNumber )
     {

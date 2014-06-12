@@ -8,5 +8,6 @@
 #include "test/lib/testEquals.h"
 #include "test/lib/testList.h"
 #include "test/lib/testMacro.h"
+#include "test/lib/throw.h"
 
 #endif // TEST_H
