@@ -1,14 +1,14 @@
-/* printAutomaton.cpp
- * Implementação de printAutomaton.h
+/* print.cpp
+ * Implementação de print.h
  */
 
 #include <cstdio>
-#include "printAutomaton.h"
+#include "print.h"
 
 using std::printf;
 using std::set;
 
-void printAutomaton( const DFA< int, char >& dfa ) {
+void print( const DFA< int, char >& dfa ) {
     printf( "       " );
     for( char c : dfa.alphabet )
         printf( "%4c", c );
@@ -46,7 +46,7 @@ static const char * toString( const set< int >& state ) {
     return str;
 }
 
-void printAutomaton( const DFA< set<int>, char >& dfa ) {
+void print( const DFA< set<int>, char >& dfa ) {
     printf( "             " );
     for( char c : dfa.alphabet )
         printf( "%10c", c );
@@ -64,7 +64,7 @@ void printAutomaton( const DFA< set<int>, char >& dfa ) {
     }
 }
 
-void printAutomaton( const NFA< int, char >& nfa ) {
+void print( const NFA< int, char >& nfa ) {
     printf( "       " );
     for( char c : nfa.alphabet )
         printf( "%10c", c );
@@ -80,4 +80,44 @@ void printAutomaton( const NFA< int, char >& nfa ) {
                 printf( "%10s", toString( nfa.delta({q, c}) ) );
         printf( "\n" );
     }
+}
+
+void printRightSide( const Production< int, char >& p ) {
+    bool firstElement = true;
+    for( auto& either : p.right ) {
+        if( firstElement )
+            firstElement = false;
+        else
+            printf( ", " );
+
+        if( either.isFirst() )
+            printf( "%d", either.first() );
+        else
+            printf( "'%c'", either.second() );
+    }
+}
+
+void print( const Grammar< int, char >& g ) {
+    printf( "Start symbol: %d\n", g.startSymbol );
+    printf( "P = {" );
+    bool firstPrint = true;
+    int currentSymbol;
+    for( const Production< int, char >& p : g.productions ) {
+        if( firstPrint ) {
+            firstPrint = false;
+            currentSymbol = p.left;
+            printf( "%d -> ", p.left );
+            printRightSide( p );
+        }
+        else if( currentSymbol == p.left ) {
+            printf( " | " );
+            printRightSide( p );
+        }
+        else {
+            currentSymbol = p.left;
+            printf( "\n     %d -> ", p.left );
+            printRightSide( p );
+        }
+    }
+    printf( "}\n" );
 }

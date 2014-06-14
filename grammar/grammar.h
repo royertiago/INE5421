@@ -22,7 +22,7 @@ template< typename NonTerminal, typename Terminal >
 struct Grammar {
     std::set< NonTerminal > nonTerminals;
     std::set< Terminal > terminals;
-    std::vector< Production<NonTerminal, Terminal> > productions;
+    std::set< Production<NonTerminal, Terminal> > productions;
     NonTerminal startSymbol;
 
     bool isNonTerminal( const Either<NonTerminal, Terminal>& ) const;

@@ -2,7 +2,7 @@
 #include <set>
 #include "conversion.h"
 #include "emptiness.h"
-#include "printAutomaton.h"
+#include "print.h"
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
 #include "grammar/grammar.h"
@@ -25,9 +25,12 @@ int main () {
                              /*Finais  */ {2},
                              /*Inicial */ 0
     };
-    printAutomaton( nfa );
+    print( nfa );
 
     DFA< std::set<int>, char > dfa = toDFA( nfa );
-    printAutomaton( dfa );
+    print( dfa );
+
+    Grammar< int, char > g = toGrammar( nfa );
+    print( g );
     return 0;
 }

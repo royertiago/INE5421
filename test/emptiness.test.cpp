@@ -24,7 +24,7 @@ DECLARE_TEST( EmptinessTest ) {
                                               {'S', {'a'} },
                                               {'A', {'S', 'B', 'a'} },
                                               {'A', {'B', 'a'} },
-                                    /*P[4]*/  {'A', {'S', 'S'} },
+                                              {'A', {'S', 'S'} },
                                               {'B', {'S', 'a', 'B'} },
                                               {'B', {'A', 'a', 'B'} }
                                        },
@@ -37,7 +37,7 @@ DECLARE_TEST( EmptinessTest ) {
     g2.startSymbol = 'A';
     b &= Test::TEST_EQUALS( isEmpty( g2 ), false );
 
-    g2.productions[4].right[1] = 'B';
+    g2.productions.erase( {'A', {'S', 'S'}} );
     b &= Test::TEST_EQUALS( isEmpty( g2 ), true );
 
     // Gramáticas com tipos heterogêneos
@@ -59,7 +59,7 @@ DECLARE_TEST( EmptinessTest ) {
                                              {0, {'a'} },
                                              {1, {0, 2, 'a'} },
                                              {1, {2, 'a'} },
-                                   /*P[4]*/  {1, {0, 0} },
+                                             {1, {0, 0} },
                                              {2, {0, 'a', 2} },
                                              {2, {1, 'a', 2} }
                                       },
@@ -72,7 +72,7 @@ DECLARE_TEST( EmptinessTest ) {
     g4.startSymbol = 1;
     b &= Test::TEST_EQUALS( isEmpty( g4 ), false );
       
-    g4.productions[4].right[1] = 2;
+    g4.productions.erase( {1, {0, 0}} );
     b &= Test::TEST_EQUALS( isEmpty( g4 ), true );
 
     return b;

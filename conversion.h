@@ -15,6 +15,7 @@
 #include <queue>
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
+#include "grammar/grammar.h"
 
 /* Converte objetos para autômatos finitos determinísticos equivalentes.
  *
@@ -25,10 +26,21 @@
  *
  * O autômato gerado não necessariamente estará minimizado. */
 template< typename State, typename Symbol >
-    DFA< State, Symbol >           toDFA( DFA< State, Symbol > );
+DFA< State, Symbol >           toDFA( DFA< State, Symbol > );
 template< typename State, typename Symbol >
-    DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > );
+DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > );
 
+/* Converte objetos para gramáticas livre de contexto equivalentes.
+ * O valor de retorno é uma Grammar< N, T >, em que N é um tipo que
+ * varia conforme o valor de retorno. T, os símbolos terminais,
+ * são compatíveis com o alfabeto do elemento de entrada. 
+ *  - Para NFAs e DFAs, T é o símbolo de entrada. 
+ *
+ * A gramática gerada é, garantidamente, regular. */
+template< typename NonTerminal, typename Terminal >
+Grammar< NonTerminal, Terminal > toGrammar( Grammar< NonTerminal, Terminal > );
+template< typename State, typename Symbol >
+Grammar< State, Symbol >         toGrammar( NFA< State, Symbol > );
 // Implementação
 
 // DFA para DFA
@@ -98,4 +110,42 @@ DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > nfa ) {
     return dfa;
 }
 
+// Gramática para gramática
+template< typename NonTerminal, typename Terminal >
+Grammar<NonTerminal, Terminal> toGrammar( Grammar<NonTerminal, Terminal> g ) {
+    return g;
+}
+
+// NFA para gramática
+template< typename State, typename Symbol >
+Grammar<State, Symbol> toGrammar( NFA<State, Symbol> nfa ) {
+    using std::set;
+    Grammar< State, Symbol > g; // Gramática a ser retornada
+
+    auto isFinalState = [&nfa]( const State& q ) -> bool {
+        return nfa.finalStates.count( q ) > 0;
+    };
+    auto nextStates = [&nfa]( const State& q, const Symbol& s ) -> set<State> {
+        if( nfa.delta.onDomain({ q, s }) )
+            return nfa.delta({q, s});
+        return set<State>();
+    };
+    auto addProduction = [&g]( const Production<State, Symbol>& p ) -> void {
+        g.productions.insert( p );
+    };
+
+    g.nonTerminals = nfa.states;
+    g.terminals = nfa.alphabet;
+    g.startSymbol = nfa.initialState;
+
+    for( const State & q : nfa.states )
+        for( const Symbol & s : nfa.alphabet )
+            for( const State& next : nextStates( q, s ) ) {
+                addProduction( {q, {s, next} } );
+                if( isFinalState( next ) )
+                    addProduction( {q, {s} } );
+            }
+
+    return g;
+}
 #endif // ALGORITHM_H
