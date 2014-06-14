@@ -7,8 +7,8 @@
 
 DECLARE_TEST( EmptinessTest ) {
     bool b = true;
-    Grammar< char, char > g1 = { /* Vt = */ {'a', 'b'},
-                                 /* Vn = */ {'S', 'A'},
+    Grammar< char, char > g1 = { /* Vn = */ {'S', 'A'},
+                                 /* Vt = */ {'a', 'b'},
                                  /* P = */  { {'S', {'a', 'A', 'S'} },
                                               {'S', {'a'} },
                                               {'A', {'S', 'b', 'a'} },
@@ -18,8 +18,8 @@ DECLARE_TEST( EmptinessTest ) {
                                  /* S = */ 'S' };
     b &= Test::TEST_EQUALS( isEmpty( g1 ), false );
 
-    Grammar< char, char > g2 = { /* Vt = */ {'a'},
-                                 /* Vn = */ {'S', 'A', 'B'},
+    Grammar< char, char > g2 = { /* Vn = */ {'S', 'A', 'B'},
+                                 /* Vt = */ {'a'},
                                  /* P = */  { {'S', {'a', 'A', 'S'} },
                                               {'S', {'a'} },
                                               {'A', {'S', 'B', 'a'} },
@@ -42,8 +42,8 @@ DECLARE_TEST( EmptinessTest ) {
 
     // Gramáticas com tipos heterogêneos
 
-    Grammar< char, int > g3 = { /* Vt = */ {'a', 'b'},
-                                /* Vn = */ {0, 1},
+    Grammar< int, char > g3 = { /* Vn = */ {0, 1},
+                                /* Vt = */ {'a', 'b'},
                                 /* P = */  { {0, {'a', 1, 0} },
                                              {0, {'a'} },
                                              {1, {0, 'b', 'a'} },
@@ -53,8 +53,8 @@ DECLARE_TEST( EmptinessTest ) {
                                 /* S = */ 0 };
     b &= Test::TEST_EQUALS( isEmpty( g3 ), false );
 
-    Grammar< char, int > g4 = { /* Vt = */ {'a'},
-                                /* Vn = */ {0, 1, 2},
+    Grammar< int, char > g4 = { /* Vn = */ {0, 1, 2},
+                                /* Vt = */ {'a'},
                                 /* P = */  { {0, {'a', 1, 0} },
                                              {0, {'a'} },
                                              {1, {0, 2, 'a'} },

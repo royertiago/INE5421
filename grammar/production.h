@@ -12,10 +12,10 @@
 #include <vector>
 #include "utility/either.h"
 
-template< typename Terminal, typename NonTerminal >
+template< typename NonTerminal, typename Terminal >
 struct Production {
     NonTerminal left;
-    std::vector< Either<Terminal, NonTerminal> > right;
+    std::vector< Either<NonTerminal, Terminal> > right;
 };
 
 #endif // PRODUCTION_H

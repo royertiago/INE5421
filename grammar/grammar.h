@@ -18,30 +18,30 @@
 #include "production.h"
 #include "utility/either.h"
 
-template< typename Terminal, typename NonTerminal >
+template< typename NonTerminal, typename Terminal >
 struct Grammar {
-    std::set< Terminal > terminals;
     std::set< NonTerminal > nonTerminals;
-    std::vector< Production<Terminal, NonTerminal> > productions;
+    std::set< Terminal > terminals;
+    std::vector< Production<NonTerminal, Terminal> > productions;
     NonTerminal startSymbol;
 
-    bool isTerminal( const Either<Terminal, NonTerminal>& ) const;
-    bool isNonTerminal( const Either<Terminal, NonTerminal>& ) const;
+    bool isNonTerminal( const Either<NonTerminal, Terminal>& ) const;
+    bool isTerminal( const Either<NonTerminal, Terminal>& ) const;
 };
 
 // Implementação
-template< typename Terminal, typename NonTerminal >
-bool Grammar< Terminal, NonTerminal >::isTerminal(
-        const Either<Terminal, NonTerminal>& a ) const
+template< typename NonTerminal, typename Terminal >
+bool Grammar< NonTerminal, Terminal >::isNonTerminal(
+        const Either<NonTerminal, Terminal>& a ) const
 {
-    return a.isFirst() && terminals.count( a ) > 0;
+    return a.isFirst() && nonTerminals.count( a ) > 0;
 }
 
-template< typename Terminal, typename NonTerminal >
-bool Grammar< Terminal, NonTerminal >::isNonTerminal(
-        const Either<Terminal, NonTerminal>& a ) const
+template< typename NonTerminal, typename Terminal >
+bool Grammar< NonTerminal, Terminal >::isTerminal(
+        const Either<NonTerminal, Terminal>& a ) const
 {
-    return a.isSecond() && nonTerminals.count( a ) > 0;
+    return a.isSecond() && terminals.count( a ) > 0;
 }
 
 #endif // GRAMMAR_H

@@ -11,14 +11,14 @@
 template< typename Representation >
 bool isEmpty( Representation );
 
-template< typename Terminal, typename NonTerminal >
-bool isEmpty( const Grammar<Terminal, NonTerminal>& g ) {
+template< typename NonTerminal, typename Terminal >
+bool isEmpty( const Grammar<NonTerminal, Terminal> & g ) {
     /* Marcaremos como bons (true) todos os símbolos que podem
      * derivar palavras, e símbolos maus (false) os símbolos
      * que jamais derivam uma forma sentencial sem símbolos não-terminais.
      * Inicialmente, assumiremos que apenas os símbolos terminais
      * são bons. */
-    std::map<Either<Terminal, NonTerminal>, bool> mark;
+    std::map< Either<NonTerminal, Terminal>, bool> mark;
     for( const auto& t : g.nonTerminals )
         mark[t] = false;
     for( const auto& t : g.terminals )
@@ -28,10 +28,10 @@ bool isEmpty( const Grammar<Terminal, NonTerminal>& g ) {
      * bons; começa em true pois marcamos os terminais como bons. */
     bool markedLastIteration = true;
 
-    auto isBad = [&]( const Either<Terminal, NonTerminal> & t ) {
+    auto isBad = [&]( const Either<NonTerminal, Terminal> & t ) {
         return !mark[t];
     };
-    auto markGood = [&]( const Either<Terminal, NonTerminal> & t ) {
+    auto markGood = [&]( const Either<NonTerminal, Terminal> & t ) {
         if( isBad(t) ) {
             markedLastIteration = true;
             mark[t] = true;
@@ -39,7 +39,7 @@ bool isEmpty( const Grammar<Terminal, NonTerminal>& g ) {
     };
 
     /* Uma produção boa tem todos os seus símbolos à direita bons. */
-    auto goodProduction = [&]( const Production<Terminal, NonTerminal>& p ) {
+    auto goodProduction = [&]( const Production<NonTerminal, Terminal>& p ) {
         for( const auto & t : p.right )
             if( isBad( t ) )
                 return false;
