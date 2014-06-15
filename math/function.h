@@ -15,6 +15,7 @@
 #include <exception>
 #include <initializer_list>
 #include <map>
+#include <set>
 #include <utility> // std::pair
 
 namespace Math {
@@ -38,6 +39,13 @@ public:
      * Para garantir que operator() nunca lançe exceções, veja onDomain(). */
     I operator()( D ) const;
 
+    /* Constrói o conjunto obtido ao aplicar esta função
+     * em cada elemento do conjunto de entrada.
+     *
+     * Caso algum dos elementos esteja fora do domínio da função,
+     * std::domain_error é lançado. */
+    std::set< I > operator()( const std::set< D >& ) const;
+
     /* Retorna true caso x pertença ao domínio desta função.
      * operator() lança exceções exatamente quando onDomain() retorna false. */
     bool onDomain( D x ) const;
@@ -58,11 +66,13 @@ public:
 
 // Implementação
 
+// Construtor
 template< typename D, typename I >
 Function<D, I>::Function( std::initializer_list< std::pair<D, I> > list ) :
     values( list.begin(), list.end() )
 {}
 
+// Operator()
 template< typename D, typename I >
 I Function<D, I>::operator()( D x ) const {
     auto iteratorToPair = values.find( x );
@@ -72,11 +82,21 @@ I Function<D, I>::operator()( D x ) const {
 }
 
 template< typename D, typename I >
+std::set<I> Function<D, I>::operator()( const std::set<D>& s ) const {
+    std::set<I> r; // [r]eturn
+    for( const D& x : s )
+        r.insert( operator()( x ) );
+    return r;
+}
+
+// Teste de domínio
+template< typename D, typename I >
 bool Function<D, I>::onDomain( D x ) const {
     auto iteratorToPair = values.find( x );
     return iteratorToPair != values.end();
 }
 
+// Inserção
 template< typename D, typename I >
 void Function<D, I>::insert( D x, I fx ) {
     values[x] = fx;

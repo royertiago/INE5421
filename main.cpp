@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <set>
+#include "compaction.h"
 #include "conversion.h"
 #include "emptiness.h"
 #include "print.h"
@@ -25,16 +26,21 @@ int main () {
                              /*Finais  */ {2},
                              /*Inicial */ 0
     };
+    printf( "Sample automaton:\n" );
     print( nfa );
 
+    printf( "\nDeterminizing:\n" );
     DFA< std::set<int>, char > dfa = toDFA( nfa );
     print( dfa );
 
-    Grammar< int, char > g = toGrammar( nfa );
-    print( g );
+    printf( "\nCompacting the determinized version:\n" );
+    print( compact( dfa ) );
 
-    auto nfa2 = toNFA( g );
-    print( nfa2 );
+    printf( "\nNon-determinizing and compacting the determinized version:\n" );
+    print( compact( toNFA(dfa) ) );
+
+    printf( "\nAs grammar:\n" );
+    print( toGrammar(nfa) );
 
     return 0;
 }
