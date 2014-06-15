@@ -32,5 +32,9 @@ int main () {
 
     Grammar< int, char > g = toGrammar( nfa );
     print( g );
+
+    auto nfa2 = toNFA( g );
+    print( nfa2 );
+
     return 0;
 }

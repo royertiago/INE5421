@@ -46,6 +46,14 @@ public:
      * Caso x já esteja no domínio desta função, o mapeamento atual
      * será alterado para fx. */
     void insert( D x, I fx );
+
+    /* Funções que permitem iteração sobre os pares da função.
+     * O iterador é garantido ser bidirecional.
+     * operator* retorna um std::pair<const D, I>. */
+    typename std::map<D, I>::iterator       begin();
+    typename std::map<D, I>::const_iterator begin() const;
+    typename std::map<D, I>::iterator       end();
+    typename std::map<D, I>::const_iterator end() const;
 };
 
 // Implementação
@@ -72,6 +80,27 @@ bool Function<D, I>::onDomain( D x ) const {
 template< typename D, typename I >
 void Function<D, I>::insert( D x, I fx ) {
     values[x] = fx;
+}
+
+// Iteradores
+template< typename D, typename I >
+typename std::map<D, I>::iterator Function<D, I>::begin() {
+    return values.begin();
+}
+
+template< typename D, typename I >
+typename std::map<D, I>::const_iterator Function<D, I>::begin() const {
+    return values.begin();
+}
+
+template< typename D, typename I >
+typename std::map<D, I>::iterator Function<D, I>::end() {
+    return values.end();
+}
+
+template< typename D, typename I >
+typename std::map<D, I>::const_iterator Function<D, I>::end() const {
+    return values.end();
 }
 
 } // namespace Math

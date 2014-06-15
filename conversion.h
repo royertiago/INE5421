@@ -13,8 +13,10 @@
 #include <set>
 #include <map>
 #include <queue>
+#include <utility>
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
+#include "automaton/newState.h"
 #include "grammar/grammar.h"
 
 /* Converte objetos para autômatos finitos determinísticos equivalentes.
@@ -30,6 +32,19 @@ DFA< State, Symbol >           toDFA( DFA< State, Symbol > );
 template< typename State, typename Symbol >
 DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > );
 
+/* Converte representações de linguagens formais para autômatos
+ * finitos não determinísticos, sem transições-épsilon.
+ *
+ * O valor de retorno é NFA< N, T >, em que N é um tipo que varia
+ * de acordo com a representação sendo convertida e T é o tipo
+ * do alfabeto usado pela representação. */
+template< typename State, typename Symbol >
+NFA< State, Symbol >         toNFA( DFA< State, Symbol > );
+template< typename State, typename Symbol >
+NFA< State, Symbol >         toNFA( NFA< State, Symbol > );
+template< typename NonTerminal, typename Terminal >
+NFA< NonTerminal, Terminal > toNFA( Grammar< NonTerminal, Terminal > );
+
 /* Converte objetos para gramáticas livre de contexto equivalentes.
  * O valor de retorno é uma Grammar< N, T >, em que N é um tipo que
  * varia conforme o valor de retorno. T, os símbolos terminais,
@@ -41,6 +56,7 @@ template< typename NonTerminal, typename Terminal >
 Grammar< NonTerminal, Terminal > toGrammar( Grammar< NonTerminal, Terminal > );
 template< typename State, typename Symbol >
 Grammar< State, Symbol >         toGrammar( NFA< State, Symbol > );
+
 // Implementação
 
 // DFA para DFA
@@ -108,6 +124,55 @@ DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > nfa ) {
             }
 
     return dfa;
+}
+
+// DFA para DFA
+template< typename State, typename Symbol >
+NFA< State, Symbol > toNFA( NFA< State, Symbol > nfa ) {
+    return nfa;
+}
+
+// DFA para NFA
+template< typename State, typename Symbol >
+NFA< State, Symbol > toNFA( DFA< State, Symbol > dfa ) {
+    NFA< State, Symbol > nfa;
+    nfa.states = dfa.states;
+    nfa.alphabet = dfa.alphabet;
+    for( auto& pair : dfa.delta )
+        nfa.delta.insert( pair.first, {pair.second} );
+    nfa.initialState = dfa.initialState;
+    nfa.finalStates = dfa.finalStates;
+    return nfa;
+}
+
+// Gramática para NFA
+template< typename NonTerminal, typename Terminal >
+NFA< NonTerminal, Terminal > toNFA( Grammar<NonTerminal, Terminal> g ) {
+    NFA< NonTerminal, Terminal > nfa;
+
+    auto addTransition = [&]( NonTerminal q, Terminal a, NonTerminal n ) {
+        if( !nfa.delta.onDomain( {q, a} ) )
+            nfa.delta.insert( {q, a}, {n} );
+        auto set = nfa.delta({q, a});
+        set.insert( n );
+        nfa.delta.insert( {q, a}, set );
+    };
+
+    nfa.states = g.nonTerminals;
+    nfa.alphabet = g.terminals;
+
+    NonTerminal finalState = generateNewState( nfa );
+    nfa.states.insert( finalState );
+    nfa.finalStates = {finalState};
+    nfa.initialState = g.startSymbol;
+
+    for( Production<NonTerminal, Terminal> p : g.productions )
+        if( p.right.size() == 1 )
+            addTransition( p.left, p.right[0], finalState );
+        else
+            addTransition( p.left, p.right[0], p.right[1] );
+
+    return nfa;
 }
 
 // Gramática para gramática
