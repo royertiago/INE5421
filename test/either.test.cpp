@@ -1,6 +1,8 @@
 /* either.test.cpp
  * Teste de unidade para a classe Either.
  */
+#include <cstdio>
+using std::printf;
 #include "utility/either.h"
 
 #include <vector>
@@ -12,50 +14,50 @@ DECLARE_TEST( EitherTest ) {
 
     // Construtor padrão
     Either< int, char > e;
-    b &= Test::TEST_EQUALS( e.isFirst(), true );
-    b &= Test::TEST_EQUALS( e.isSecond(), false );
-    b &= Test::TEST_EQUALS( e.first(), 0 );
-    EXPECT_THROW( e.second(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( e.is<int>(), true );
+    b &= Test::TEST_EQUALS( e.is<char>(), false );
+    b &= Test::TEST_EQUALS( e.getAs<int>(), 0 );
+    EXPECT_THROW( e.getAs<char>(), std::bad_cast, b );
 
     // Construtor de atribuição
     Either< int, char > p = 'A';
-    b &= Test::TEST_EQUALS( p.isFirst(), false );
-    b &= Test::TEST_EQUALS( p.isSecond(), true );
-    EXPECT_THROW( p.first(), std::bad_cast, b );
-    b &= Test::TEST_EQUALS( p.second(), 'A' );
+    b &= Test::TEST_EQUALS( p.is<int>(), false );
+    b &= Test::TEST_EQUALS( p.is<char>(), true );
+    EXPECT_THROW( p.getAs<int>(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( p.getAs<char>(), 'A' );
 
     Either< int, char > q = (int) 'A';
-    b &= Test::TEST_EQUALS( q.isFirst(), true );
-    b &= Test::TEST_EQUALS( q.isSecond(), false );
-    b &= Test::TEST_EQUALS( q.first(), (int) 'A' );
-    EXPECT_THROW( q.second(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( q.is<int>(), true );
+    b &= Test::TEST_EQUALS( q.is<char>(), false );
+    b &= Test::TEST_EQUALS( q.getAs<int>(), (int) 'A' );
+    EXPECT_THROW( q.getAs<char>(), std::bad_cast, b );
 
     // Atribuição
     e = 7;
-    b &= Test::TEST_EQUALS( e.isFirst(), true );
-    b &= Test::TEST_EQUALS( e.isSecond(), false );
-    b &= Test::TEST_EQUALS( e.first(), 7 );
-    EXPECT_THROW( e.second(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( e.is<int>(), true );
+    b &= Test::TEST_EQUALS( e.is<char>(), false );
+    b &= Test::TEST_EQUALS( e.getAs<int>(), 7 );
+    EXPECT_THROW( e.getAs<char>(), std::bad_cast, b );
 
     int i = e;
     b &= Test::TEST_EQUALS( i, 7 );
 
     // Alteração de tipo
     e = '7';
-    b &= Test::TEST_EQUALS( e.isFirst(), false );
-    b &= Test::TEST_EQUALS( e.isSecond(), true );
-    EXPECT_THROW( e.first(), std::bad_cast, b );
-    b &= Test::TEST_EQUALS( e.second(), '7' );
+    b &= Test::TEST_EQUALS( e.is<int>(), false );
+    b &= Test::TEST_EQUALS( e.is<char>(), true );
+    EXPECT_THROW( e.getAs<int>(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( e.getAs<char>(), '7' );
 
     char c = e;
     b &= Test::TEST_EQUALS( c, '7' );
 
     // Cópia
     Either< int, char > f = e;
-    b &= Test::TEST_EQUALS( f.isFirst(), false );
-    b &= Test::TEST_EQUALS( f.isSecond(), true );
-    EXPECT_THROW( f.first(), std::bad_cast, b );
-    b &= Test::TEST_EQUALS( f.second(), '7' );
+    b &= Test::TEST_EQUALS( f.is<int>(), false );
+    b &= Test::TEST_EQUALS( f.is<char>(), true );
+    EXPECT_THROW( f.getAs<int>(), std::bad_cast, b );
+    b &= Test::TEST_EQUALS( f.getAs<char>(), '7' );
     c = f;
     b &= Test::TEST_EQUALS( c, '7' );
 
@@ -69,7 +71,7 @@ DECLARE_TEST( EitherTest ) {
     b &= Test::TEST_EQUALS( f < e, true );
     f = 800;
     b &= Test::TEST_EQUALS( e == f, false );
-    b &= Test::TEST_EQUALS( e < f, false ); // Note que T == int, U == char
+    b &= Test::TEST_EQUALS( e < f, false );
     b &= Test::TEST_EQUALS( f < e, true );
     e = 801;
     b &= Test::TEST_EQUALS( e == f, false );
@@ -78,13 +80,10 @@ DECLARE_TEST( EitherTest ) {
 
     // Homogêneo
     Either< int, int > j;
-    b &= Test::TEST_EQUALS( j.isFirst(), true );
-    b &= Test::TEST_EQUALS( j.isSecond(), true );
+    b &= Test::TEST_EQUALS( j.is<int>(), true );
     j = 7;
-    b &= Test::TEST_EQUALS( j.isFirst(), true );
-    b &= Test::TEST_EQUALS( j.isSecond(), true );
-    b &= Test::TEST_EQUALS( j.first(), 7 );
-    b &= Test::TEST_EQUALS( j.second(), 7 );
+    b &= Test::TEST_EQUALS( j.is<int>(), true );
+    b &= Test::TEST_EQUALS( j.getAs<int>(), 7 );
     Either< int, int > k = j;
     b &= Test::TEST_EQUALS( j == k, true );
     b &= Test::TEST_EQUALS( j < k, false );
@@ -120,12 +119,12 @@ DECLARE_TEST( EitherTest ) {
 
     std::sort( v.begin(), v.end() );
     for( int i = 0; i < 4; ++i ) {
-        b &= Test::TEST_EQUALS( v[i].isFirst(), true );
-        b &= Test::TEST_EQUALS( v[i].isSecond(), false );
+        b &= Test::TEST_EQUALS( v[i].is<int>(), true );
+        b &= Test::TEST_EQUALS( v[i].is<char>(), false );
     }
     for( int i = 4; i < 8; ++i ) {
-        b &= Test::TEST_EQUALS( v[i].isFirst(), false );
-        b &= Test::TEST_EQUALS( v[i].isSecond(), true );
+        b &= Test::TEST_EQUALS( v[i].is<int>(), false );
+        b &= Test::TEST_EQUALS( v[i].is<char>(), true );
     }
 
     w = {1, 5, 45, 879, 'a', 'b', 'd', 'z'};

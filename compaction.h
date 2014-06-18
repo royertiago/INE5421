@@ -19,7 +19,6 @@
  *
  * Automaton e Symbol é preservado na compactação; o autômato
  * resultante é isomorfo ao fornecido. */
-
 template< template< typename, typename > class Automaton,
           typename State, typename Symbol >
 Automaton<int, Symbol> compact( const Automaton<State, Symbol>& input )

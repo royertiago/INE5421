@@ -90,10 +90,10 @@ void printRightSide( const Production< int, char >& p ) {
         else
             printf( ", " );
 
-        if( either.isFirst() )
-            printf( "%d", either.first() );
+        if( either.is<int>() )
+            printf( "%d", either.getAs<int>() );
         else
-            printf( "'%c'", either.second() );
+            printf( "'%c'", either.getAs<char>() );
     }
 }
 
