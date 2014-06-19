@@ -1,6 +1,6 @@
 /* identity.h
  * Tipo auxiliar, usado para definir especializações de
- * funções membro sem precisar sespecializar toda a classe.
+ * funções membro sem precisar especializar toda a classe.
  *
  * Ela está num cabeçalho separado para evitar problemas
  * com múltiplas definições, caso esta estratégia seja usada

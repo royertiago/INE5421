@@ -2,3 +2,5 @@ Adicionar tesde de unidade para determinização.
 Adicionar teste de unidade para conversão NFA -> gramática.
 Adicionar teste de unidade para conversão gramática -> NFA.
 Adicionar teste de unidade para compactação de autômatos.
+Testar construtores de cópia/movimento em Either.
+Testar tipos não-triviais em Either.

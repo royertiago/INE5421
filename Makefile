@@ -2,12 +2,16 @@
 COMPILER = g++
 FLAGS = -std=c++0x -Wall -pedantic -Wextra -ggdb
 LIBS := -I./
-#Esta variável foi definida com := para que não seja uma variável recursiva.\
-	Variáveis recursivas têm seu valor computado toda vez que a variável \
-	é usada; esta aqui, não. \
-	A chamada $(shell command) incorpora à variável flag o que o comando \
-	imprime. Definir esta variável como não-recursiva evita a perda \
-	de performance por chamar o shell repetidas vezes.
+
+DFLAGS =
+ifndef NO_CONCEPT
+	DFLAGS += -D_GLIBCXX_CONCEPT_CHECKS
+endif
+# DFLAGS - Define flags
+# Sempre que a variável NO_CONCEPT estiver definida, não adicionaremos a flag
+# 	-D_GLIBCXX_CONCEPT_CHECKS
+# Para definir a variável NO_CONCEPT, basta invocar
+# 	make NO_CONCEPT=1
 
 #Lista de object files e dependências
 
@@ -55,8 +59,8 @@ também provoquem a recriação de alce.d. \
 No final, as regras assumem esta forma: \
 alce.d alce.cpp : dependencias
 
-$(OBJ): %.o : %.cpp
-	$(COMPILER) $(FLAGS) $(LIBS) -c $< -o $@
+$(OBJ): %.o : %.cpp Makefile
+	$(COMPILER) $(FLAGS) $(DFLAGS) $(LIBS) -c $< -o $@
 
 include $(OBJDEPS)
 

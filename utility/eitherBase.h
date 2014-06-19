@@ -7,7 +7,6 @@
 
 #include <new>
 #include <stdexcept>
-#include <typeinfo> // bad_cast
 #include <utility>
 #include "utility/identity.h"
 #include "utility/type_traits.h"
@@ -21,6 +20,13 @@ struct EitherBase< Head, Tail... > {
         Head head;
         EitherBase< Tail... > tail;
     };
+
+    static_assert( !std::is_reference<Head>::value,
+            "There is no support to references." );
+    static_assert( !std::is_const<Head>::value,
+            "There is no support to const types." );
+    static_assert( !std::is_volatile<Head>::value,
+            "There is no support to volatile types." );
 
     /* Construtor padrão. Inicializado com o valor nulo
      * de Head. */
@@ -74,7 +80,14 @@ struct EitherBase< Head, Tail... > {
     }
 
     /* Retorna o índice do tipo especificado.
-     * Mais precisamente, caso os tipos desta classe sejam
+     * 
+     * A primeira função apenas redireciona para as outras duas, mas
+     * descartando referências e const/volatile do tipo passado; ela
+     * pode ser usada como
+     *  eitherBase<Ts...>::template typeIndex<T>()
+     *
+     * A segunda e terceira funções fazem o "trabalho sujo", sem descartar
+     * const/volatile. Caso os tipos desta classe sejam
      *  T0, T1, T2, ..., TN
      * typeIndex( j, identity<Ti> ) retorna j + i.
      *
@@ -82,12 +95,17 @@ struct EitherBase< Head, Tail... > {
      * a primeira aparição é considerada.
      * Caso o tipo não ocorra na lista de tipos, -1 é retornado. */
     template< typename T >
+    static constexpr unsigned typeIndex() {
+        return typeIndex( 0, identity< typename unqualified<T>::type >() );
+    }
+    template< typename T >
     static constexpr unsigned typeIndex( unsigned current, identity<T> ) {
         return EitherBase<Tail...>::typeIndex( current + 1, identity<T>() );
     }
     static constexpr unsigned typeIndex( unsigned current, identity<Head> ) {
         return current;
     }
+
 
     /* Retorna o elemento do tipo especificado na união.
      * Nenhuma checagem é feita para garantir que o tipo especificado
@@ -183,7 +201,7 @@ struct EitherBase<> {
     }
 
     void destroy( unsigned ) {
-        throw std::bad_cast();
+        throw std::runtime_error( "Empty Either destruction\n" );
     }
 
     void assignOnIndex( unsigned, const EitherBase<>& ) {

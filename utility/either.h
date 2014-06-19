@@ -7,6 +7,8 @@
  * Esta classe suporta objetos de quantos tipos forem necessários,
  * especifiados via templates. Objetos desta classe sempre conterão 
  * um elemento válido, de algum dos tipos especificados.
+ *
+ * Não há suporte para referências ou tipos const/volatile.
  */
 #ifndef EITHER_H
 #define EITHER_H
@@ -45,11 +47,7 @@ public:
     /* Constrói a classe com o tipo especificado. */
     template< typename T,
         typename = typename std::enable_if<
-            EitherBase<Ts...>::typeIndex( 0, 
-                identity<
-                    typename unqualified< T >::type
-                >()
-            ) != -1
+            EitherBase<Ts...>::template typeIndex<T>() != -1
         >::type
     >
     Either( T&& t );
@@ -68,11 +66,7 @@ public:
      * Caso o tipo interno do objeto mude, o objeto atual é destruído. */
     template< typename T,
         typename = typename std::enable_if<
-            EitherBase<Ts...>::typeIndex( 0, 
-                identity<
-                    typename unqualified< T >::type
-                >()
-            ) != -1
+            EitherBase<Ts...>::template typeIndex<T>() != -1
         >::type
     >
     Either& operator=( T&& );
@@ -88,7 +82,11 @@ public:
     /* Retorna o objeto armazenando internamente.
      * Não há erros caso o tipo interno seja diferente do operador
      * de conversão especificado. */
-    template< typename T >
+    template< typename T,
+        typename = typename std::enable_if<
+            EitherBase<Ts...>::template typeIndex<T>() != -1
+        >::type
+    >
     operator T() const;
 
     /* Retorna o objeto armazenado internamente.
@@ -111,7 +109,7 @@ public:
 template< typename ... Ts > template< typename T, typename >
 Either<Ts...>::Either( T&& t ) :
     value( std::forward<T>(t) ),
-    type( EitherBase<Ts...>::typeIndex( 0, identity<T>() ) )
+    type( EitherBase<Ts...>::template typeIndex<T>() )
 {}
 
 // Construtor padrão
@@ -143,12 +141,12 @@ Either<Ts...>::~Either() {
 // Atribuição de T's
 template< typename ... Ts > template< typename T, typename >
 Either<Ts...>& Either<Ts...>::operator=( T&& t ) {
-    if( EitherBase<Ts...>::typeIndex( 0, identity<T>() ) == type )
+    if( EitherBase<Ts...>::template typeIndex<T>() == type )
         value.get( identity<T>() ) = std::forward<T>(t);
     else {
         value.destroy( type );
         new (&value) EitherBase<Ts...>( std::forward<T>(t) );
-        type = EitherBase<Ts...>::typeIndex( 0, identity<T>() );
+        type = EitherBase<Ts...>::template typeIndex<T>();
     }
     return *this;
 }
@@ -181,10 +179,10 @@ Either<Ts...>& Either<Ts...>::operator=( Either<Ts...>&& e ) {
 // Funcionalidade básica
 template< typename ... Ts > template< typename T >
 bool Either<Ts...>::is() const {
-    return EitherBase<Ts...>::typeIndex( 0, identity<T>() ) == type;
+    return EitherBase<Ts...>::template typeIndex<T>() == type;
 }
 
-template< typename ... Ts > template< typename T >
+template< typename ... Ts > template< typename T, typename >
 Either<Ts...>::operator T() const {
     return value.get( identity<T>() );
 }
@@ -193,8 +191,7 @@ template< typename ... Ts > template< typename T >
 T Either<Ts...>::getAs() const {
     if( is<T>() )
         return operator T();
-    //*(int*) 0 = 0;
-    throw std::bad_cast();
+    throw std::runtime_error( "Wrong type Either cast\n" );
 }
 
 // Operadores relacionais

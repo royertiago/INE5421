@@ -2,8 +2,9 @@
  * Implementação de testList.h
  */
 
-#include <vector>
 #include <cstdio>
+#include <exception>
+#include <vector>
 #include "testList.h"
 
 namespace Test {
@@ -30,8 +31,18 @@ void addTest( TestFunction t, const char * n, const char * f ) {
 
 bool run() {
     for( TestData t : tests() )
-        if( t.test() == false ) {
-            printf( "Test %s at file %s failed.\n", t.name, t.file );
+        try {
+            if( t.test() == false ) {
+                printf( "Test %s at file %s failed.\n", t.name, t.file );
+                return false;
+            }
+        } catch (std::exception& ex ) {
+            printf( "Exception thrown by test %s at file %s.\n"
+                    "  what(): %s\n", t.name, t.file, ex.what() );
+            return false;
+        } catch (...) {
+            printf( "Extraneous exception thrown by test %s at file %s.\n",
+                    t.name, t.file );
             return false;
         }
 
