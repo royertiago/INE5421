@@ -29,14 +29,30 @@
  */
 template< typename ForwardIterator >
 auto tokenize( ForwardIterator begin, ForwardIterator end ) ->
-    TokenVector< decltype((*begin)) >;
+    TokenVector< typename unqualified<decltype(*begin)>::type >;
+
+/* Esta função explicita a concatenação numa sequência de tokens.
+ * Mas precisamente, um Operator::Concatenation será adicionado
+ * antes de cada:
+ *  Parentheses::Left;
+ *  Char; e
+ *  épsilon,
+ * exceto se esses caracteres forem precedidos de
+ *  SigmaClosure;
+ *  VerticalBar;
+ *  Concatenation;
+ *  Parentheses::Left;
+ *  ou estiverem no início do vetor.
+ */
+template< typename Char >
+TokenVector< Char > explicitConcatenations( const TokenVector< Char >& );
 
 // Implementação
 template< typename ForwardIterator >
 auto tokenize( ForwardIterator begin, ForwardIterator end ) ->
-    TokenVector< decltype((*begin)) >
+    TokenVector< typename unqualified<decltype(*begin)>::type >
 {
-    TokenVector< decltype(*begin) > v;
+    TokenVector< typename unqualified<decltype(*begin)>::type > v;
 
     bool nextIsLiteral = false;
 
@@ -62,6 +78,38 @@ auto tokenize( ForwardIterator begin, ForwardIterator end ) ->
     } // fim for
 
     return v;
+}
+
+template< typename Char >
+TokenVector< Char > explicitConcatenations( const TokenVector< Char >& in ) {
+    TokenVector< Char > out;
+    bool skipNext = true; // não adicionamos '.' no começo do vetor.
+
+    for( auto e : in ) {
+        if( skipNext ) {
+            out.push_back( e );
+            skipNext = false;
+            continue;
+        }
+
+        if(
+            e.template is<Char>()    || 
+            e.template is<Epsilon>() ||
+            e == Parentheses::Left
+          )
+            out.push_back( Operator::Concatenation );
+
+        if(
+            e == Operator::VerticalBar   ||
+            e == Operator::SigmaClosure  ||
+            e == Operator::Concatenation ||
+            e == Parentheses::Left
+          )
+            skipNext = true;
+
+        out.push_back( e );
+    }
+    return out;
 }
 
 #endif // PARSING_H

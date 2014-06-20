@@ -121,3 +121,25 @@ void print( const Grammar< int, char >& g ) {
     }
     printf( "}\n" );
 }
+
+const char * etostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
+    if( e.is<Epsilon>() )
+        return "Epsilon";
+    if( e.is<Operator>() )
+        switch( e.operator Operator() ) {
+            case Operator::SigmaClosure:      return "SigmaClosure";
+            case Operator::KleneeClosure:     return "KleneeClosure";
+            case Operator::PositiveClosure:   return "PositiveClosure";
+            case Operator::Optional:          return "Optional";
+            case Operator::Concatenation:     return "Concatenation";
+            case Operator::VerticalBar:       return "VerticalBar";
+        }
+    if( e == Parentheses::Left )
+        return "LeftParentheses";
+    if( e == Parentheses::Right )
+        return "RightParentheses";
+
+    static char v[] = "'x'";
+    v[1] = e;
+    return v;
+}

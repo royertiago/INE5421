@@ -5,6 +5,7 @@
 #define TOKENS_H
 
 #include <vector>
+#include "epsilon.h"
 #include "utility/either.h"
 #include "utility/type_traits.h"
 
@@ -54,10 +55,10 @@ enum class Parentheses {
  * operadores e parênteses.
  *
  * Note que, como Either não suporta referências/const/volatile,
- * usamos unqualified<Char>::type ao invés de Char. */
+ * temos de usar unqualified<Char>::type ao invés de Char; entretanto,
+ * para não prejudicar a dedução de tipos, quem deve fazer a desqualificação
+ * são as funções que usam TokenVector. */
 template< typename Char >
-using TokenVector = std::vector<Either<
-        typename unqualified<Char>::type, Epsilon, Operator, Parentheses
-    > >;
+using TokenVector = std::vector<Either<Char, Epsilon, Operator, Parentheses> >;
 
 #endif // TOKENS_H

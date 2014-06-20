@@ -14,22 +14,22 @@ struct Epsilon {};
 constexpr Epsilon epsilon = Epsilon();
 
 // Operadores relacionais
-bool operator ==( const Epsilon&, const Epsilon& ) {
+inline bool operator ==( const Epsilon&, const Epsilon& ) {
     return true;
 }
-bool operator !=( const Epsilon&, const Epsilon& ) {
+inline bool operator !=( const Epsilon&, const Epsilon& ) {
     return false;
 }
-bool operator < ( const Epsilon&, const Epsilon& ) {
+inline bool operator < ( const Epsilon&, const Epsilon& ) {
     return false;
 }
-bool operator > ( const Epsilon&, const Epsilon& ) {
+inline bool operator > ( const Epsilon&, const Epsilon& ) {
     return false;
 }
-bool operator <=( const Epsilon&, const Epsilon& ) {
+inline bool operator <=( const Epsilon&, const Epsilon& ) {
     return true;
 }
-bool operator >=( const Epsilon&, const Epsilon& ) {
+inline bool operator >=( const Epsilon&, const Epsilon& ) {
     return true;
 }
 

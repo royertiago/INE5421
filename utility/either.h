@@ -24,7 +24,11 @@ class Either;
  * Os valores serão considerados iguais apenas se forem do mesmo
  * tipo e os valores internos forem iguais.
  * Exige-se que operator== esteja sobrecarregado para todos
- * os tipos armazenáveis pela classe. */
+ * os tipos armazenáveis pela classe.
+ *
+ * Este operador também está sobrecarregado para comparar diretamente
+ * um Either com um dos tipos, exigindo, neste caso, apenas a sobrecarga
+ * de operator==. */
 template< typename ... Ts >
 bool operator==( const Either<Ts...>&, const Either<Ts...>& );
 
@@ -199,6 +203,24 @@ template< typename ... Ts >
 bool operator==( const Either<Ts...>& lhs, const Either<Ts...>& rhs ) {
     return lhs.type == rhs.type && 
         lhs.value.isEqualsOnIndex( rhs.type, rhs.value );
+}
+
+template< typename T, typename ... Ts >
+typename std::enable_if<
+        EitherBase<Ts...>::template typeIndex<T>() != -1, bool
+    >::type
+operator==( const Either<Ts...>& lhs, const T& rhs ) {
+    if( lhs.template is<T>() )
+        return lhs.template operator T() == rhs;
+    return false;
+}
+
+template< typename T, typename ... Ts >
+typename std::enable_if<
+        EitherBase<Ts...>::template typeIndex<T>() != -1, bool
+    >::type
+operator==( const T& lhs, const Either<Ts...>& rhs ) {
+    return rhs == lhs;
 }
 
 template< typename ... Ts >
