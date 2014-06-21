@@ -18,11 +18,6 @@
  * O único operador para o qual isto é significativo é o operador libra.
  */
 enum class Operator {
-    /* Operador libra: x l y
-     * Equivalente a x (y . x)*
-     */
-    SigmaClosure,
-
     /* Fecho de Klenee: x* */
     KleneeClosure,
 
@@ -35,6 +30,11 @@ enum class Operator {
      * Equivalente a x | [epsilon]
      */
     Optional,
+
+    /* Operador libra: x : y
+     * Equivalente a x (y . x)*
+     */
+    SigmaClosure,
 
     /* Concatenação: x . y
      * É o único operador implícito; a justaposição de dois conjuntos

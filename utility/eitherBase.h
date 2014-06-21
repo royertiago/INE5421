@@ -173,7 +173,7 @@ template<>
 struct EitherBase<> {
     template< typename T >
     EitherBase( T&& ) {
-        static_assert( dependant_false<T>::type,
+        static_assert( dependant_false<T>::value,
                 "No such type in EitherBase" );
     }
 
@@ -196,7 +196,7 @@ struct EitherBase<> {
 
     template< typename T >
     const T& get( identity<T> ) const {
-        static_assert( dependant_false<T>::type,
+        static_assert( dependant_false<T>::value,
                 "No such type in EitherBase" );
     }
 

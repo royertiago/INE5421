@@ -7,6 +7,7 @@
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
 #include "grammar/grammar.h"
+#include "regex/parsing.h"
 #include "test/lib/testList.h"
 
 using std::printf;
@@ -42,5 +43,25 @@ int main () {
     printf( "\nAs grammar:\n" );
     print( toGrammar(nfa) );
 
+    std::string str = "ab*c:d";
+    printf( "\nToken vector of %s :\n", str.c_str() );
+    print( tokenize(str.begin(), str.end()) );
+    print( explicitConcatenations( tokenize(str.begin(), str.end()) ) );
+    printf( "\nSyntax tree of %s :\n", str.c_str() );
+    print( parse(str) );
+
+    str = "aa|b*:d";
+    printf( "\nToken vector of %s :\n", str.c_str() );
+    print( tokenize(str.begin(), str.end()) );
+    print( explicitConcatenations( tokenize(str.begin(), str.end()) ) );
+    printf( "\nSyntax tree of %s :\n", str.c_str() );
+    print( parse(str) );
+
+    str = "aa+?*";
+    printf( "\nToken vector of %s :\n", str.c_str() );
+    print( tokenize(str.begin(), str.end()) );
+    print( explicitConcatenations( tokenize(str.begin(), str.end()) ) );
+    printf( "\nSyntax tree of %s :\n", str.c_str() );
+    print( parse(str) ); // Erro de arredondamento na última linha...
     return 0;
 }

@@ -124,22 +124,76 @@ void print( const Grammar< int, char >& g ) {
 
 const char * etostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
     if( e.is<Epsilon>() )
-        return "Epsilon";
+        return "&";
     if( e.is<Operator>() )
         switch( e.operator Operator() ) {
-            case Operator::SigmaClosure:      return "SigmaClosure";
-            case Operator::KleneeClosure:     return "KleneeClosure";
-            case Operator::PositiveClosure:   return "PositiveClosure";
-            case Operator::Optional:          return "Optional";
-            case Operator::Concatenation:     return "Concatenation";
-            case Operator::VerticalBar:       return "VerticalBar";
+            case Operator::SigmaClosure:      return ":";
+            case Operator::KleneeClosure:     return "*";
+            case Operator::PositiveClosure:   return "+";
+            case Operator::Optional:          return "?";
+            case Operator::Concatenation:     return ".";
+            case Operator::VerticalBar:       return "|";
         }
     if( e == Parentheses::Left )
-        return "LeftParentheses";
+        return "{";
     if( e == Parentheses::Right )
-        return "RightParentheses";
+        return ")";
 
     static char v[] = "'x'";
     v[1] = e;
     return v;
+}
+
+const char * etostr( const Either<char, Epsilon, Operator>& e ) {
+    if( e.is<Epsilon>() )
+        return "&";
+    if( e.is<Operator>() )
+        switch( e.operator Operator() ) {
+            case Operator::SigmaClosure:      return ":";
+            case Operator::KleneeClosure:     return "*";
+            case Operator::PositiveClosure:   return "+";
+            case Operator::Optional:          return "?";
+            case Operator::Concatenation:     return ".";
+            case Operator::VerticalBar:       return "|";
+        }
+
+    static char v[] = "'x'";
+    v[1] = e;
+    return v;
+}
+
+void print( const TokenVector< char >& v ) {
+    for( const auto& token : v )
+        printf( "%-3.3s", etostr(token) );
+    printf( "\n" );
+}
+typedef Either<char, Epsilon, Operator> EitherCEO;
+typedef BinaryTree<EitherCEO>::const_iterator TreeIterator;
+
+void print( const std::vector<TreeIterator>& vec ) {
+    std::vector<TreeIterator> r;
+    bool callAgain = false;
+    int printSize = 40 / vec.size();
+    for( TreeIterator it : vec ) {
+        if( !it ) {
+            r.push_back( it ); r.push_back( it );
+            printf( "%*.s", 2*printSize, "" );
+            continue;
+        }
+        printf( "%*.*s%*.s", printSize, printSize, etostr(*it), printSize, "" );
+        r.push_back( it.leftChild() );
+        r.push_back( it.rightChild() );
+        callAgain = true;
+    }
+    printf( "\n%s", vec.size() < 3 ? "\n" : "" );
+    if( callAgain )
+        print( r );
+}
+
+void print( const BinaryTree<EitherCEO>& tree ) {
+    for( const auto& node : tree.raw() )
+        printf( "{%i %i %i / %s} ", node.parent, node.leftChild, 
+                node.rightChild, etostr(node.data) );
+    printf( "\n" );
+    print( std::vector<TreeIterator>{ tree.iteratorToRoot() } );
 }

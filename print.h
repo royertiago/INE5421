@@ -6,16 +6,20 @@
 #define PRINT_H
 
 #include <set>
+#include "epsilon.h"
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
 #include "grammar/grammar.h"
-#include "utility/either.h"
 #include "regex/tokens.h"
+#include "utility/binaryTree.h"
+#include "utility/either.h"
 
 void print( const DFA< int, char >& );
 void print( const DFA< std::set<int>, char >& );
 void print( const NFA< int, char >& );
 void print( const Grammar< int, char >& );
+void print( const TokenVector< char >& );
+void print( const BinaryTree<Either<char, Epsilon, Operator>>& );
 
 /* Converte para string o objeto passado.
  * Não delete o ponteiro retornado. */

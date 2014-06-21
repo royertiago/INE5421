@@ -4,3 +4,4 @@ Adicionar teste de unidade para conversão gramática -> NFA.
 Adicionar teste de unidade para compactação de autômatos.
 Testar construtores de cópia/movimento em Either.
 Testar tipos não-triviais em Either.
+Estilo de codificação não é regular com relação às assinaturas das funções.

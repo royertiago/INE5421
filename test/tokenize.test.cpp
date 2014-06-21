@@ -11,7 +11,7 @@
 DECLARE_TEST( TokenizeTest ) {
     bool b = true;
 
-    std::string s = "alb(\\(.*\\.))";
+    std::string s = "a:b(\\(.*\\.))";
     TokenVector<char> w = {'a', Operator::SigmaClosure, 'b',
         Parentheses::Left, '(', Operator::KleneeClosure, '.',
         Parentheses::Right, Parentheses::Right };

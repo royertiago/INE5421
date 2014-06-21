@@ -31,4 +31,13 @@ struct unqualified {
 template< typename T >
 struct dependant_false : std::false_type {};
 
+/* Extrai o primeiro tipo de um template variádico. */
+template< typename T >
+struct extract_head_type;
+
+template< template< typename... > class V, typename Head, typename ... Tail >
+struct extract_head_type< V<Head, Tail...> > {
+    typedef Head type;
+};
+
 #endif // UTILITY_TYPE_TRAITS_H

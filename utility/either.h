@@ -16,7 +16,7 @@
 #include "eitherBase.h"
 #include "utility/type_traits.h"
 
-// Declaração dos operadores relacionais
+// Declaração dos operadores relacionais como amigos
 template< typename ... Ts >
 class Either;
 
@@ -28,7 +28,11 @@ class Either;
  *
  * Este operador também está sobrecarregado para comparar diretamente
  * um Either com um dos tipos, exigindo, neste caso, apenas a sobrecarga
- * de operator==. */
+ * de operator== para o tipo comparado.
+ *
+ * operator!= também está definido para estes casos, apenas não declarado
+ * aqui por não haver necessidade de declará-lo como amigo.
+ */
 template< typename ... Ts >
 bool operator==( const Either<Ts...>&, const Either<Ts...>& );
 
@@ -145,8 +149,12 @@ Either<Ts...>::~Either() {
 // Atribuição de T's
 template< typename ... Ts > template< typename T, typename >
 Either<Ts...>& Either<Ts...>::operator=( T&& t ) {
-    if( EitherBase<Ts...>::template typeIndex<T>() == type )
-        value.get( identity<T>() ) = std::forward<T>(t);
+    if( EitherBase<Ts...>::template typeIndex<T>() == type ) {
+        value.get( identity<typename unqualified<T>::type>() )
+            = std::forward<T>(t);
+        /* Desqualificamos o tipo pois T&& é uma "referência universal",
+         * então T pode resolver para const T&, por exemplo. */
+    }
     else {
         value.destroy( type );
         new (&value) EitherBase<Ts...>( std::forward<T>(t) );
@@ -198,7 +206,7 @@ T Either<Ts...>::getAs() const {
     throw std::runtime_error( "Wrong type Either cast\n" );
 }
 
-// Operadores relacionais
+// operator==
 template< typename ... Ts >
 bool operator==( const Either<Ts...>& lhs, const Either<Ts...>& rhs ) {
     return lhs.type == rhs.type && 
@@ -223,6 +231,29 @@ operator==( const T& lhs, const Either<Ts...>& rhs ) {
     return rhs == lhs;
 }
 
+// operator!=
+template< typename ... Ts >
+bool operator!=( const Either<Ts...>& lhs, const Either<Ts...>& rhs ) {
+    return !(lhs == rhs); 
+}
+
+template< typename T, typename ... Ts >
+typename std::enable_if<
+        EitherBase<Ts...>::template typeIndex<T>() != -1, bool
+    >::type
+operator!=( const Either<Ts...>& lhs, const T& rhs ) {
+    return !(lhs == rhs); 
+}
+
+template< typename T, typename ... Ts >
+typename std::enable_if<
+        EitherBase<Ts...>::template typeIndex<T>() != -1, bool
+    >::type
+operator!=( const T& lhs, const Either<Ts...>& rhs ) {
+    return !(lhs == rhs); 
+}
+
+// operator<
 template< typename ... Ts >
 bool operator<( const Either<Ts...>& lhs, const Either<Ts...>& rhs ) {
     if( lhs.type < rhs.type )
