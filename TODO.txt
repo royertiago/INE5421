@@ -1,7 +1,5 @@
-Adicionar tesde de unidade para determinização.
-Adicionar teste de unidade para conversão NFA -> gramática.
-Adicionar teste de unidade para conversão gramática -> NFA.
-Adicionar teste de unidade para compactação de autômatos.
+Adicionar teste de unidade para conversões e compactação de autômatos.
 Testar construtores de cópia/movimento em Either.
 Testar tipos não-triviais em Either.
-Estilo de codificação não é regular com relação às assinaturas das funções.
+Estilo de codificação não é regular com relação às assinaturas das funções,
+    especialmente em regex/parsing.h

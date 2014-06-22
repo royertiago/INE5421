@@ -82,6 +82,29 @@ void print( const NFA< int, char >& nfa ) {
     }
 }
 
+void print( const NFAe< int, char >& nfa ) {
+    printf( "       " );
+    for( char c : nfa.alphabet )
+        printf( "%10c", c );
+    printf( "   epsilon\n" );
+    for( int q : nfa.states ) {
+        printf( "%s%s%4d", q == nfa.initialState ? "->" : "  ",
+                           nfa.finalStates.count(q) == 0 ? " ":"*",
+                           q );
+        for( char c : nfa.alphabet )
+            if( !nfa.delta.onDomain({q, c}) )
+                printf( "         -" );
+            else
+                printf( "%10s", toString( nfa.delta({q, c}) ) );
+
+        if( !nfa.delta.onDomain({q, epsilon}) )
+            printf( "         -" );
+        else
+            printf( "%10s", toString( nfa.delta({q, epsilon}) ) );
+        printf( "\n" );
+    }
+}
+
 void printRightSide( const Production< int, char >& p ) {
     bool firstElement = true;
     for( auto& either : p.right ) {
@@ -173,7 +196,7 @@ typedef BinaryTree<EitherCEO>::const_iterator TreeIterator;
 void print( const std::vector<TreeIterator>& vec ) {
     std::vector<TreeIterator> r;
     bool callAgain = false;
-    int printSize = 40 / vec.size();
+    int printSize = 32 / vec.size();
     for( TreeIterator it : vec ) {
         if( !it ) {
             r.push_back( it ); r.push_back( it );

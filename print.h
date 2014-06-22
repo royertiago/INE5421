@@ -9,6 +9,7 @@
 #include "epsilon.h"
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
+#include "automaton/nonDeterministicWithEpsilon.h"
 #include "grammar/grammar.h"
 #include "regex/tokens.h"
 #include "utility/binaryTree.h"
@@ -17,6 +18,7 @@
 void print( const DFA< int, char >& );
 void print( const DFA< std::set<int>, char >& );
 void print( const NFA< int, char >& );
+void print( const NFAe< int, char >& );
 void print( const Grammar< int, char >& );
 void print( const TokenVector< char >& );
 void print( const BinaryTree<Either<char, Epsilon, Operator>>& );

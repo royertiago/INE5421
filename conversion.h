@@ -3,6 +3,7 @@
  * regulares suportados pelo programa:
  *  - Autômato finito determinístico;
  *  - Autômato finito não-determinístico;
+ *  - Autômato finito não-determinístico com transições-épsilon;
  *  - Gramática regular.
  *
  * Conversão de um tipo para ele próprio sempre é incluído, por completude.
@@ -16,6 +17,7 @@
 #include <utility>
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
+#include "automaton/nonDeterministicWithEpsilon.h"
 #include "automaton/newState.h"
 #include "grammar/grammar.h"
 
@@ -28,9 +30,13 @@
  *
  * O autômato gerado não necessariamente estará minimizado. */
 template< typename State, typename Symbol >
-DFA< State, Symbol >           toDFA( DFA< State, Symbol > );
+DFA< State, Symbol >                   toDFA( DFA< State, Symbol > );
 template< typename State, typename Symbol >
-DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > );
+DFA< std::set<State>, Symbol >         toDFA( NFA< State, Symbol > );
+template< typename State, typename Symbol >
+DFA< std::set<State>, Symbol >         toDFA( NFAe< State, Symbol > );
+template< typename NonTerminal, typename Terminal >
+DFA< std::set<NonTerminal>, Terminal > toDFA( Grammar<NonTerminal, Terminal> );
 
 /* Converte representações de linguagens formais para autômatos
  * finitos não determinísticos, sem transições-épsilon.
@@ -42,8 +48,26 @@ template< typename State, typename Symbol >
 NFA< State, Symbol >         toNFA( DFA< State, Symbol > );
 template< typename State, typename Symbol >
 NFA< State, Symbol >         toNFA( NFA< State, Symbol > );
+template< typename State, typename Symbol >
+NFA< State, Symbol >         toNFA( NFAe< State, Symbol > );
 template< typename NonTerminal, typename Terminal >
 NFA< NonTerminal, Terminal > toNFA( Grammar< NonTerminal, Terminal > );
+
+/* Converte representações de linguagens regulares para autômatos
+ * finitos não deterministicos com transições-épsilon equivalentes.
+ *
+ * O valor de retorno é NFAe<N, T>, em que N é um tipo que varia
+ * de acordo com a representação de entrada e T é o tipo do alfabeto
+ * usado pela representação.
+ */
+template< typename State, typename Symbol >
+NFAe< State, Symbol >         toNFAe( DFA< State, Symbol > );
+template< typename State, typename Symbol >
+NFAe< State, Symbol >         toNFAe( NFA< State, Symbol > );
+template< typename State, typename Symbol >
+NFAe< State, Symbol >         toNFAe( NFAe< State, Symbol > );
+template< typename NonTerminal, typename Terminal >
+NFAe< NonTerminal, Terminal > toNFAe( Grammar< NonTerminal, Terminal > );
 
 /* Converte objetos para gramáticas livre de contexto equivalentes.
  * O valor de retorno é uma Grammar< N, T >, em que N é um tipo que
@@ -52,10 +76,15 @@ NFA< NonTerminal, Terminal > toNFA( Grammar< NonTerminal, Terminal > );
  *  - Para NFAs e DFAs, T é o símbolo de entrada. 
  *
  * A gramática gerada é, garantidamente, regular. */
-template< typename NonTerminal, typename Terminal >
-Grammar< NonTerminal, Terminal > toGrammar( Grammar< NonTerminal, Terminal > );
+template< typename State, typename Symbol >
+Grammar< State, Symbol >         toGrammar( DFA< State, Symbol > );
 template< typename State, typename Symbol >
 Grammar< State, Symbol >         toGrammar( NFA< State, Symbol > );
+template< typename State, typename Symbol >
+Grammar< State, Symbol >         toGrammar( NFAe< State, Symbol > );
+template< typename NonTerminal, typename Terminal >
+Grammar< NonTerminal, Terminal > toGrammar( Grammar< NonTerminal, Terminal > );
+
 
 // Implementação
 
@@ -126,10 +155,16 @@ DFA< std::set<State>, Symbol > toDFA( NFA< State, Symbol > nfa ) {
     return dfa;
 }
 
-// DFA para DFA
+// NFAe para DFA (determinização)
 template< typename State, typename Symbol >
-NFA< State, Symbol > toNFA( NFA< State, Symbol > nfa ) {
-    return nfa;
+DFA< std::set<State>, Symbol > toDFA( NFAe< State, Symbol > nfae ) {
+    return toDFA( toNFA( nfae ) );
+}
+
+// Gramática para DFA
+template< typename NonTerminal, typename Terminal >
+DFA<std::set<NonTerminal>, Terminal> toDFA( Grammar<NonTerminal, Terminal> g ) {
+    return toDFA( toNFA( g ) );
 }
 
 // DFA para NFA
@@ -142,6 +177,81 @@ NFA< State, Symbol > toNFA( DFA< State, Symbol > dfa ) {
         nfa.delta.insert( pair.first, {pair.second} );
     nfa.initialState = dfa.initialState;
     nfa.finalStates = dfa.finalStates;
+    return nfa;
+}
+
+// NFA para NFA
+template< typename State, typename Symbol >
+NFA< State, Symbol > toNFA( NFA< State, Symbol > nfa ) {
+    return nfa;
+}
+
+// NFAe para NFA
+template< typename State, typename Symbol >
+NFA< State, Symbol > toNFA( NFAe< State, Symbol > nfae ) {
+    using std::pair;
+    using std::set;
+    NFA< State, Symbol > nfa;
+
+    /* Une o segundo conjunto ao primeiro. */
+    auto setUnion = []( set<State>& base, const set<State>& target ) {
+        base.insert( target.begin(), target.end() );
+    };
+    /* epsilonClosureTo( q, a ) é a união de todos os delta( p, a ),
+     * para p pertencente a epsilonClosure( q ).
+     *
+     * Isto é, é o conjunto de estados que pode ser alcançado a partir
+     * de q, fazendo quantas transições-épsilon forem desejadas, e, por
+     * fim, uma transição por a. */
+    auto epsilonClosureTo = [&]( State q, Symbol a ) {
+        set< State > r;
+        for( State p : nfae.epsilonClosure( q ) )
+            if( nfae.delta.onDomain({p, a}) )
+                setUnion( r, nfae.delta({p, a}) );
+        return r;
+    };
+    /* epsilonClosureOfSet( s ) é a união dos fechamentos-épsilon
+     * dos estados do conjunto s. */
+    auto epsilonClosureOfSet = [&]( set<State> s ) {
+        set< State > r;
+        for( State q : s )
+            setUnion( r, nfae.epsilonClosure( q ) );
+        return r;
+    };
+    /* reachableStatesWith( q, a ) é a união dos fechos-épsilon
+     * dos conjuntos delta( p, a ) para p pertencente ao fecho-épsilon
+     * de q.
+     *
+     * Isto é, o conjunto dos conjuntos alcançáveis a partir de q,
+     * fazendo zero ou mais transições-épsilon, então uma transição
+     * por a, e então zero ou mais transições-épsilon. */
+    auto reachableStatesWith = [&]( State q, Symbol a ) {
+        return epsilonClosureOfSet( epsilonClosureTo( q, a ) );
+    };
+    // true se a interseção dos dois conjuntos for vazia.
+    auto emptyIntersection = []( set< State > a, set< State > b ) {
+        for( State q : a )
+            if( b.count( q ) > 0 )
+                return false;
+        return true;
+    };
+
+    nfa.states = nfae.states;
+    nfa.alphabet = nfae.alphabet;
+
+    for( State q : nfae.states )
+        for( Symbol a : nfae.alphabet )
+            nfa.delta.insert( {q, a}, reachableStatesWith( q, a ) );
+
+    nfa.initialState = nfae.initialState;
+
+    nfa.finalStates = nfae.finalStates;
+    if( !emptyIntersection( 
+                nfae.finalStates, 
+                nfae.epsilonClosure( nfae.initialState )
+                ) )
+        nfa.finalStates.insert( nfa.initialState );
+
     return nfa;
 }
 
@@ -175,10 +285,41 @@ NFA< NonTerminal, Terminal > toNFA( Grammar<NonTerminal, Terminal> g ) {
     return nfa;
 }
 
-// Gramática para gramática
+// DFA para NFAe
+template< typename State, typename Symbol >
+NFAe< State, Symbol > toNFAe( DFA< State, Symbol > automaton ) {
+    return toNFAe( toNFA( automaton ) );
+}
+
+// NFA para NFAe
+template< typename State, typename Symbol >
+NFAe< State, Symbol > toNFAe( NFA< State, Symbol > nfa ) {
+    NFAe< State, Symbol > nfae;
+    nfae.states = nfa.states;
+    nfae.alphabet = nfa.alphabet;
+    for( const auto& pair : nfa.delta )
+        nfae.delta.insert( pair.first, pair.second );
+    nfae.initialState = nfa.initialState;
+    nfae.finalStates = nfa.finalStates;
+    return nfae;
+}
+
+// NFAe para NFAe
+template< typename State, typename Symbol >
+NFAe< State, Symbol > toNFAe( NFAe< State, Symbol > automaton ) {
+    return automaton;
+}
+
+// Gramática para NFAe
 template< typename NonTerminal, typename Terminal >
-Grammar<NonTerminal, Terminal> toGrammar( Grammar<NonTerminal, Terminal> g ) {
-    return g;
+NFAe< NonTerminal, Terminal > toNFAe( Grammar< NonTerminal, Terminal > g ) {
+    return toNFAe( toNFA( g ) );
+}
+
+// DFA para gramática
+template< typename State, typename Symbol >
+Grammar<State, Symbol> toGrammar( DFA<State, Symbol> dfa ) {
+    return toGrammar( toNFA( dfa ) );
 }
 
 // NFA para gramática
@@ -213,4 +354,17 @@ Grammar<State, Symbol> toGrammar( NFA<State, Symbol> nfa ) {
 
     return g;
 }
+
+// NFAe para gramática
+template< typename State, typename Symbol >
+Grammar<State, Symbol> toGrammar( NFAe<State, Symbol> nfae ) {
+    return toGrammar( toNFA( nfae ) );
+}
+
+// Gramática para gramática
+template< typename NonTerminal, typename Terminal >
+Grammar<NonTerminal, Terminal> toGrammar( Grammar<NonTerminal, Terminal> g ) {
+    return g;
+}
+
 #endif // ALGORITHM_H

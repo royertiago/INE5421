@@ -55,7 +55,7 @@ public:
      * será alterado para fx. */
     void insert( D x, I fx );
 
-    /* Funções que permitem iteração sobre os pares da função.
+    /* Métodos que permitem iteração sobre os pares da função.
      * O iterador é garantido ser bidirecional.
      * operator* retorna um std::pair<const D, I>. */
     typename std::map<D, I>::iterator       begin();
