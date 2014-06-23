@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <set>
 using std::printf;
+#include "closureProperties.h"
 #include "compaction.h"
 #include "conversion.h"
 #include "emptiness.h"
@@ -76,6 +77,36 @@ int main () {
 
     printf( "\nTo NFAe again:\n" );
     print( toNFAe( toGrammar( nfae ) ) );
+
+    printf( "\nTwo simple DFA's:\n" );
+    DFA< int, char > m3 = { {0, 1, 2},
+                            {'0', '1'},
+                            { {{0, '0'}, 0},
+                              {{0, '1'}, 1},
+                              {{1, '0'}, 2},
+                              {{1, '1'}, 0},
+                              {{2, '0'}, 1},
+                              {{2, '1'}, 2}
+                            },
+                            {0}, 0};
+    print( m3 );
+    DFA< int, char > m2 = { {0, 1},
+                            {'0', '1'},
+                            { {{0, '0'}, 0},
+                              {{0, '1'}, 1},
+                              {{1, '0'}, 0},
+                              {{1, '1'}, 1}
+                            },
+                            {0}, 0};
+    print( m2 );
+    printf( "\nUnion:\n" );
+    print( automataUnion( m2, m3 ) );
+    printf( "\nIntersection:\n" );
+    print( automataIntersection( m2, m3 ) );
+    printf( "\nFirst minus second:\n" );
+    print( automataSubtraction( m2, m3 ) );
+    printf( "\nSecond minus first:\n" );
+    print( automataSubtraction( m3, m2 ) );
 
     std::string str = "ab*c:d";
     printf( "\nToken vector of %s :\n", str.c_str() );

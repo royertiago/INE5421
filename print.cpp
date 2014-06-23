@@ -7,6 +7,7 @@
 
 using std::printf;
 using std::set;
+using std::pair;
 
 void print( const DFA< int, char >& dfa ) {
     printf( "       " );
@@ -60,6 +61,25 @@ void print( const DFA< set<int>, char >& dfa ) {
                 printf( "         -" );
             else
                 printf( "%10s", toString( dfa.delta({q, c}) ) );
+        printf( "\n" );
+    }
+}
+
+void print( const DFA< pair<int, int>, char >& dfa ) {
+    printf( "          " );
+    for( char c : dfa.alphabet )
+        printf( "%8c", c );
+    printf( "\n" );
+    for( pair<int, int> q : dfa.states ) {
+        printf( "%s%s[%2d,%2d]", q == dfa.initialState ? "->" : "  ",
+                            dfa.finalStates.count(q) == 0 ? " ":"*",
+                            q.first, q.second );
+        for( char c : dfa.alphabet )
+            if( !dfa.delta.onDomain({q, c}) )
+                printf( "         -" );
+            else
+                printf( " [%2d,%2d]", dfa.delta({q, c}).first, 
+                                      dfa.delta({q, c}).second );
         printf( "\n" );
     }
 }

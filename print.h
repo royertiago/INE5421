@@ -6,6 +6,7 @@
 #define PRINT_H
 
 #include <set>
+#include <utility>
 #include "epsilon.h"
 #include "automaton/deterministic.h"
 #include "automaton/nonDeterministic.h"
@@ -17,6 +18,7 @@
 
 void print( const DFA< int, char >& );
 void print( const DFA< std::set<int>, char >& );
+void print( const DFA< std::pair<int, int>, char >& );
 void print( const NFA< int, char >& );
 void print( const NFAe< int, char >& );
 void print( const Grammar< int, char >& );
