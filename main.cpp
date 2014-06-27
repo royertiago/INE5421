@@ -36,8 +36,8 @@ int main () {
     DFA< std::set<int>, char > dfa = toDFA( nfa );
     print( dfa );
 
-    printf( "\nCompacting the determinized version:\n" );
-    print( compact( dfa ) );
+    printf( "\nCompacting the determinized version, offset == 1:\n" );
+    print( compact( dfa, 1 ) );
 
     printf( "\nNon-determinizing and compacting the determinized version:\n" );
     print( compact( toNFA(dfa) ) );

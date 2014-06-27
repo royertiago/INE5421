@@ -5,7 +5,11 @@
  * se Q = {0, 1, 2, ..., n-1} para algum n, e Q0 = 0.
  *
  * Teorema: todo autômato possui um autômato compacto equivalente.
- * Demonstração: veja a função compact() abaixo. */
+ * Demonstração: veja a função compact() abaixo.
+ *
+ * Note que este algoritmo não preserva a disjunção entre o alfabeto
+ * de entrada e o conjunto de estados, então tenha cuidado ao usar
+ * esta função com autômatos cujo o tipo do símbolo é int. */
 #ifndef COMPACTION_H
 #define COMPACTION_H
 
@@ -18,16 +22,20 @@
  * Symbol    é o tipo do alfabeto deste autômato.
  *
  * Automaton e Symbol é preservado na compactação; o autômato
- * resultante é isomorfo ao fornecido. */
+ * resultante é isomorfo ao fornecido.
+ *
+ * offset determina o elemento inicial do conjunto Q; isto é, na verdade,
+ * teremos Q = {offset, offset + 1, offset + 2, ..., offset + |Q| - 1}. */
 template< template< typename, typename > class Automaton,
           typename State, typename Symbol >
-Automaton<int, Symbol> compact( const Automaton<State, Symbol>& input )
+Automaton<int, Symbol> compact( const Automaton<State, Symbol>& input,
+        int offset = 0 )
 {
     Automaton< int, Symbol > output;
     Math::Function< State, int > f; // f é a função de mapeamento.
 
     auto remap = [&]( State q ) {
-        int q_ = output.states.size(); // q_ == q' -> novo "nome" para q
+        int q_ = output.states.size() + offset; // q_ é q' - novo "nome" para q
         f.insert(q, q_);
         output.states.insert( q_ );
         if( input.finalStates.count( q ) > 0 ) // se q é final,
@@ -38,7 +46,7 @@ Automaton<int, Symbol> compact( const Automaton<State, Symbol>& input )
     };
 
     output.alphabet = input.alphabet;
-    output.initialState = 0;
+    output.initialState = offset;
     remap( input.initialState );
 
     for( const auto& q : input.states )
