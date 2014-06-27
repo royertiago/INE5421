@@ -33,6 +33,13 @@ struct NFAe {
      * pelo intervalo [begin, end). */
     template< typename ForwardIterator >
     bool accepts( ForwardIterator begin, ForwardIterator end );
+
+    /* Adiciona a transição do estado from para o estado to via s.
+     * Nada é feito caso a transição já exista.
+     *
+     * É como se fosse adicionana uma aresta de from para to com
+     * o símbolo s no grafo do autômato. */
+    void addTransition( State from, Either<Symbol, Epsilon> s, State to );
 };
 
 // Implementação
@@ -62,4 +69,15 @@ std::set< State > NFAe<State, Symbol>::epsilonClosure( State q ) const {
     return current;
 }
 
+template< typename State, typename Symbol >
+void NFAe< State, Symbol >::addTransition( State from,
+        Either<Symbol, Epsilon> s, State to )
+{
+    if( delta.onDomain({from, s}) ) {
+        auto set = delta({from, s});
+        set.insert( to );
+        delta.insert({from, s}, set );
+    } else
+        delta.insert({from, s}, {to});
+}
 #endif // NON_DETERMINISTIC_WITH_EPSILON_H

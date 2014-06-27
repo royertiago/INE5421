@@ -78,6 +78,11 @@ int main () {
     printf( "\nTo NFAe again:\n" );
     print( toNFAe( toGrammar( nfae ) ) );
 
+    nfae.addTransition( 1, epsilon, 0 );
+    nfae.addTransition( 0, 'b', 2 );
+    printf( "Now with e-transition from 1 to 0 and b-transition from 0 to 2:\n" );
+    print( nfae );
+
     printf( "\nTwo simple DFA's:\n" );
     DFA< int, char > m3 = { {0, 1, 2},
                             {'0', '1'},
