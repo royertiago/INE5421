@@ -222,7 +222,7 @@ BinaryTree< Either<Char, Epsilon, Operator> >
 {
     BinaryTree< Either<Char, Epsilon, Operator> > tree;
     auto iterator = v.begin();
-    buildSubexpression( tree.iteratorToRoot(), iterator, v.end() );
+    buildSubexpression( tree.root(), iterator, v.end() );
 
     if( iterator != v.end() )
         throw syntax_error( "Unbalanced parentheses" );
@@ -287,8 +287,8 @@ void buildUnary( TreeIterator     nodeIterator,
                  ForwardIterator  iterationLimit )
 {
     // Como o tipo do caractere desapareceu até aqui, temos de reconstruí-lo:
-    typedef typename extract_head_type<
-                typename unqualified<decltype(*nodeIterator)>::type
+    typedef typename extract_head_type< 
+                typename TreeIterator::value_type
             >::type Char;
 
     if( *currentToken == Parentheses::Left ) {

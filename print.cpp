@@ -238,5 +238,5 @@ void print( const BinaryTree<EitherCEO>& tree ) {
         printf( "{%i %i %i / %s} ", node.parent, node.leftChild, 
                 node.rightChild, etostr(node.data) );
     printf( "\n" );
-    print( std::vector<TreeIterator>{ tree.iteratorToRoot() } );
+    print( std::vector<TreeIterator>{ tree.root() } );
 }

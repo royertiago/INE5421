@@ -7,41 +7,17 @@
 #include <vector>
 #include <type_traits>
 
-/* A estrutura interna da árvore é otimizada para ocupar menos
- * espaço, tanto na heap (por usar inteiros ao invés de ponteiros)
- * quanto no alocador do sistema (por não alocar nodos dinamicamente).
- *
- * Um nodo contém apenas os índices dos demais nodos. */
-template< typename T, typename Index >
-struct TreeNode {
-    static_assert( std::is_unsigned<Index>::value,
-        "Index must be an unsigned integral type" );
-    Index parent;
-    Index leftChild;
-    Index rightChild;
-    T data;
-
-    /* Como Index é um tipo primitivo sem sinal, o padrão do C++ garante
-     * que -1 é o maior valor representável pelo tipo Index (4.7/2).
-     *
-     * Como a representação interna da árvore é um vetor de nodos,
-     * representar o nodo nulo como 0 tiraria o espaço inicial do
-     * vetor, desperdiçando sizeof(TreeNode) bytes. */
-    static constexpr Index null = -1;
-};
-
-template< typename T, typename Index >
-class BinaryTreeIterator {
-};
-
 template< typename T, typename Index = unsigned >
 class BinaryTree {
-    typedef TreeNode<T, Index> node;
-
+    // Classe auxiliar
+    struct node;
     std::vector< node > nodes;
-    Index root;
 
 public:
+    typedef       T  value_type;
+    typedef       T& reference;
+    typedef const T& const_reference;
+
     /* Classe interna, que será o iterador da árvore.
      * Como ela está numa área pública, ela pode ser
      * acessada de fora da classe, mas não construída. */
@@ -54,6 +30,9 @@ public:
         iterator( BinaryTree<T, Index>*, Index );
 
     public:
+        typedef       T  value_type;
+        typedef       T& reference;
+        typedef const T& const_reference;
         /* Construtor disponível por conveniência; algum outro
          * iterador deve ser atribuido sobre este antes que ele
          * possa ser utilizado. */
@@ -109,7 +88,7 @@ public:
         operator bool();
 
         /* Retorna o elemento apontado por este iterador. */
-        T& operator*();
+        reference operator*();
     };
 
     class const_iterator {
@@ -120,23 +99,26 @@ public:
 
         const_iterator( const BinaryTree<T, Index>*, Index );
     public:
+        typedef       T  value_type;
+        typedef       T& reference;
+        typedef const T& const_reference;
         const_iterator() = default;
 
         const_iterator leftChild();
         const_iterator rightChild();
         const_iterator parent();
         operator bool();
-        const T& operator*();
+        const_reference operator*();
     };
 
     /* Construtor padrão.
-     * Constrói a árvore com apenas o nodo raíz, cujo valor é
+     * Constrói a árvore com apenas o nodo raiz, cujo valor é
      * o valor nulo de T. */
     BinaryTree();
 
-    /* Retorna um iterador para a raíz da árvore. */
-    iterator iteratorToRoot();
-    const_iterator iteratorToRoot() const;
+    /* Retorna um iterador para a raiz da árvore. */
+    iterator       root();
+    const_iterator root() const;
 
     /* Retorna o vetor de nodos desta árvore. */
     const std::vector<node>& raw() const;
@@ -158,20 +140,47 @@ private: // Métodos usados internamente
 };
 
 // Implementação
+
+/* A estrutura interna da árvore é otimizada para ocupar menos
+ * espaço, tanto na heap (por usar inteiros ao invés de ponteiros)
+ * quanto no alocador do sistema (por não alocar nodos dinamicamente).
+ *
+ * Um nodo contém apenas os índices dos demais nodos. */
+template< typename T, typename Index >
+struct BinaryTree<T, Index>::node {
+    static_assert( std::is_unsigned<Index>::value,
+        "Index must be an unsigned integral type" );
+    Index parent;
+    Index leftChild;
+    Index rightChild;
+    T data;
+
+    /* Como Index é um tipo primitivo sem sinal, o padrão do C++ garante
+     * que -1 é o maior valor representável pelo tipo Index (4.7/2).
+     *
+     * Como a representação interna da árvore é um vetor de nodos,
+     * representar o nodo nulo como 0 tiraria o espaço inicial do
+     * vetor, desperdiçando sizeof(TreeNode) bytes. */
+    static constexpr Index null = -1;
+};
+
+// BinaryTree - construtor
 template< typename T, typename Index >
 BinaryTree<T, Index>::BinaryTree() :
     nodes( 1, {node::null, node::null, node::null, T()} )
 {}
 
+// BinaryTree - iteradores
 template< typename T, typename Index >
-auto BinaryTree<T, Index>::iteratorToRoot() -> iterator {
+auto BinaryTree<T, Index>::root() -> iterator {
     return iterator( this, 0 );
 }
 template< typename T, typename Index >
-auto BinaryTree<T, Index>::iteratorToRoot() const -> const_iterator {
+auto BinaryTree<T, Index>::root() const -> const_iterator {
     return const_iterator( this, 0 );
 }
 
+// BinaryTree - decensão
 template< typename T, typename Index >
 void BinaryTree<T, Index>::makeLeftChild( Index index ) {
     nodes[index].leftChild = nodes.size();
@@ -183,31 +192,46 @@ void BinaryTree<T, Index>::makeRightChild( Index index ) {
     nodes.push_back({ index, node::null, node::null, T() });
 }
 
+
+// BinaryTree - ascensão
+
+template< typename T, typename Index >
+void BinaryTree<T, Index>::leftAscent( Index index ) {
+    /* Copiaremos o nó atual para um novo lugar
+     * e promoveremos o atual para pai da cópia. */
+    Index childIndex = nodes.size();
+    nodes.push_back( nodes[index] );
+
+    // Corrigir os filhos do nodo pai
+    nodes[index].rightChild = childIndex;
+    nodes[index].leftChild = node::null;
+
+    // Corrigir o pai do nodo filho
+    nodes[childIndex].parent = index;
+
+    /* Note que, como o nodo que ascendeu continou no mesmo
+     * lugar, o nodo zero será sempre o nodo raíz. */
+}
+
+template< typename T, typename Index >
+void BinaryTree<T, Index>::rightAscent( Index index ) {
+    Index childIndex = nodes.size();
+    nodes.push_back( nodes[index] );
+
+    nodes[index].leftChild = childIndex;
+    nodes[index].rightChild = node::null;
+
+    nodes[childIndex].parent = index;
+}
+
+// BinaryTree - raw data
 template< typename T, typename Index >
 auto BinaryTree<T, Index>::raw() const -> const std::vector<node>& {
     return nodes;
 }
 
-template< typename T, typename Index >
-void BinaryTree<T, Index>::leftAscent( Index index ) {
-    /* Faremos o contrário: copiaremos o nó atual para um novo lugar
-     * e apontamos o nó atual para o outro lado. */
-    Index ascendentIndex = nodes.size();
-    nodes[index].rightChild = ascendentIndex;
-    nodes[index].leftChild = node::null;
-    nodes.push_back( nodes[index] );
-    nodes[ascendentIndex].parent = index;
-}
-template< typename T, typename Index >
-void BinaryTree<T, Index>::rightAscent( Index index ) {
-    Index ascendentIndex = nodes.size();
-    nodes.push_back( nodes[index] );
-    nodes[index].leftChild = ascendentIndex;
-    nodes[index].rightChild = node::null;
-    nodes[ascendentIndex].parent = index;
-}
-
 // Implementação do iterador
+// iterator - construtor
 template< typename T, typename Index >
 BinaryTree<T, Index>::iterator::iterator( BinaryTree<T, Index>* t, Index i ) :
     tree( t ),
