@@ -17,6 +17,8 @@ public:
     typedef       T  value_type;
     typedef       T& reference;
     typedef const T& const_reference;
+    typedef       T* pointer;
+    typedef const T* const_pointer;
 
     /* Classe interna, que será o iterador da árvore.
      * Como ela está numa área pública, ela pode ser
@@ -33,6 +35,8 @@ public:
         typedef       T  value_type;
         typedef       T& reference;
         typedef const T& const_reference;
+        typedef       T* pointer;
+        typedef const T* const_pointer;
         /* Construtor disponível por conveniência; algum outro
          * iterador deve ser atribuido sobre este antes que ele
          * possa ser utilizado. */
@@ -89,6 +93,7 @@ public:
 
         /* Retorna o elemento apontado por este iterador. */
         reference operator*();
+        pointer operator->();
     };
 
     class const_iterator {
@@ -102,6 +107,8 @@ public:
         typedef       T  value_type;
         typedef       T& reference;
         typedef const T& const_reference;
+        typedef       T* pointer;
+        typedef const T* const_pointer;
         const_iterator() = default;
 
         const_iterator leftChild();
@@ -109,6 +116,7 @@ public:
         const_iterator parent();
         operator bool();
         const_reference operator*();
+        const_pointer operator->();
     };
 
     /* Construtor padrão.
@@ -283,6 +291,11 @@ T& BinaryTree<T, Index>::iterator::operator*() {
     return tree->nodes[index].data;
 }
 
+template< typename T, typename Index >
+T* BinaryTree<T, Index>::iterator::operator->() {
+    return &tree->nodes[index].data;
+}
+
 // Implementação do iterador constante
 template< typename T, typename Index >
 BinaryTree<T, Index>::const_iterator::const_iterator( 
@@ -312,6 +325,10 @@ BinaryTree<T, Index>::const_iterator::operator bool() {
 template< typename T, typename Index >
 const T& BinaryTree<T, Index>::const_iterator::operator*() {
     return tree->nodes[index].data;
+}
+template< typename T, typename Index >
+const T* BinaryTree<T, Index>::const_iterator::operator->() {
+    return &tree->nodes[index].data;
 }
 
 #endif // BINARY_TREE_H
