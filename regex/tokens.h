@@ -4,10 +4,19 @@
 #ifndef TOKENS_H
 #define TOKENS_H
 
+#include <stdexcept>
 #include <vector>
 #include "epsilon.h"
 #include "utility/either.h"
 #include "utility/type_traits.h"
+
+/* Exceção que deve ser lançada pelos algoritmos ao encontrar probelmas 
+ * com tokens, como um token não listado, por exemplo. */
+struct token_error : public std::runtime_error {
+    explicit token_error( const char * what ) :
+        runtime_error( what )
+    {}
+};
 
 /* Operadores lidos pelo programa.
  * Eles estão descritos na ordem de precedência. 

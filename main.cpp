@@ -11,8 +11,8 @@ using std::printf;
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "grammar/grammar.h"
 #include "regex/parsing.h"
+#include "regex/thompson.h"
 #include "test/lib/testList.h"
-
 
 int main () {
     if( !Test::run() )
@@ -80,7 +80,7 @@ int main () {
 
     nfae.addTransition( 1, epsilon, 0 );
     nfae.addTransition( 0, 'b', 2 );
-    printf( "Now with e-transition from 1 to 0 and b-transition from 0 to 2:\n" );
+    printf( "With e-transition from 1 to 0 and b-transition from 0 to 2:\n" );
     print( nfae );
 
     printf( "\nTwo simple DFA's:\n" );
@@ -133,5 +133,17 @@ int main () {
     print( explicitConcatenations( tokenize(str.begin(), str.end()) ) );
     printf( "\nSyntax tree of %s :\n", str.c_str() );
     print( parse(str) );
+
+    str = "ab";
+    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
+    print( thompson( parse(str) ) );
+
+    str = "01*|1";
+    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
+    print( thompson( parse(str) ) );
+    
+    str = "a:b?+";
+    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
+    print( thompson( parse(str) ) );
     return 0;
 }
