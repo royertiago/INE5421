@@ -27,26 +27,6 @@ void print( const DFA< int, char >& dfa ) {
     }
 }
 
-static const char * toString( const set< int >& state ) {
-    using std::sprintf;
-    static char str[1024];
-
-    str[0] = '\0';
-    char * ptr = str;
-    ptr += sprintf( ptr, "{" );
-
-    bool firstPrint = true;
-    for( int q : state )
-        if( firstPrint ) {
-            ptr += sprintf( ptr, "%d", q );
-            firstPrint = false;
-        } else
-            ptr += sprintf( ptr, ", %d", q );
-
-    sprintf( ptr, "}" );
-    return str;
-}
-
 void print( const DFA< set<int>, char >& dfa ) {
     printf( "             " );
     for( char c : dfa.alphabet )
@@ -55,12 +35,12 @@ void print( const DFA< set<int>, char >& dfa ) {
     for( set<int> q : dfa.states ) {
         printf( "%s%s%10s", q == dfa.initialState ? "->" : "  ",
                             dfa.finalStates.count(q) == 0 ? " ":"*",
-                            toString( q ) );
+                            tostr( q ) );
         for( char c : dfa.alphabet )
             if( !dfa.delta.onDomain({q, c}) )
                 printf( "         -" );
             else
-                printf( "%10s", toString( dfa.delta({q, c}) ) );
+                printf( "%10s", tostr( dfa.delta({q, c}) ) );
         printf( "\n" );
     }
 }
@@ -97,7 +77,7 @@ void print( const NFA< int, char >& nfa ) {
             if( !nfa.delta.onDomain({q, c}) )
                 printf( "         -" );
             else
-                printf( "%10s", toString( nfa.delta({q, c}) ) );
+                printf( "%10s", tostr( nfa.delta({q, c}) ) );
         printf( "\n" );
     }
 }
@@ -115,12 +95,12 @@ void print( const NFAe< int, char >& nfa ) {
             if( !nfa.delta.onDomain({q, c}) )
                 printf( "         -" );
             else
-                printf( "%10s", toString( nfa.delta({q, c}) ) );
+                printf( "%10s", tostr( nfa.delta({q, c}) ) );
 
         if( !nfa.delta.onDomain({q, epsilon}) )
             printf( "         -" );
         else
-            printf( "%10s", toString( nfa.delta({q, epsilon}) ) );
+            printf( "%10s", tostr( nfa.delta({q, epsilon}) ) );
         printf( "\n" );
     }
 }
@@ -165,7 +145,43 @@ void print( const Grammar< int, char >& g ) {
     printf( "}\n" );
 }
 
-const char * etostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
+void print( const TokenVector< char >& v ) {
+    for( const auto& token : v )
+        printf( "%-3.3s", tostr(token) );
+    printf( "\n" );
+}
+typedef Either<char, Epsilon, Operator> EitherCEO;
+typedef BinaryTree<EitherCEO>::const_iterator TreeIterator;
+
+void print( const std::vector<TreeIterator>& vec ) {
+    std::vector<TreeIterator> r;
+    bool callAgain = false;
+    int printSize = 32 / vec.size();
+    for( TreeIterator it : vec ) {
+        if( !it ) {
+            r.push_back( it ); r.push_back( it );
+            printf( "%*.s", 2*printSize, "" );
+            continue;
+        }
+        printf( "%*.*s%*.s", printSize, printSize, tostr(*it), printSize, "" );
+        r.push_back( it.leftChild() );
+        r.push_back( it.rightChild() );
+        callAgain = true;
+    }
+    printf( "\n%s", vec.size() < 3 ? "\n" : "" );
+    if( callAgain )
+        print( r );
+}
+
+void print( const BinaryTree<EitherCEO>& tree ) {
+    for( const auto& node : tree.raw() )
+        printf( "{%i %i %i / %s} ", node.parent, node.leftChild, 
+                node.rightChild, tostr(node.data) );
+    printf( "\n" );
+    print( std::vector<TreeIterator>{ tree.root() } );
+}
+
+const char * tostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
     if( e.is<Epsilon>() )
         return "&";
     if( e.is<Operator>() )
@@ -187,7 +203,7 @@ const char * etostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
     return v;
 }
 
-const char * etostr( const Either<char, Epsilon, Operator>& e ) {
+const char * tostr( const Either<char, Epsilon, Operator>& e ) {
     if( e.is<Epsilon>() )
         return "&";
     if( e.is<Operator>() )
@@ -205,38 +221,22 @@ const char * etostr( const Either<char, Epsilon, Operator>& e ) {
     return v;
 }
 
-void print( const TokenVector< char >& v ) {
-    for( const auto& token : v )
-        printf( "%-3.3s", etostr(token) );
-    printf( "\n" );
-}
-typedef Either<char, Epsilon, Operator> EitherCEO;
-typedef BinaryTree<EitherCEO>::const_iterator TreeIterator;
+const char * tostr( const set< int >& state ) {
+    using std::sprintf;
+    static char str[1024];
 
-void print( const std::vector<TreeIterator>& vec ) {
-    std::vector<TreeIterator> r;
-    bool callAgain = false;
-    int printSize = 32 / vec.size();
-    for( TreeIterator it : vec ) {
-        if( !it ) {
-            r.push_back( it ); r.push_back( it );
-            printf( "%*.s", 2*printSize, "" );
-            continue;
-        }
-        printf( "%*.*s%*.s", printSize, printSize, etostr(*it), printSize, "" );
-        r.push_back( it.leftChild() );
-        r.push_back( it.rightChild() );
-        callAgain = true;
-    }
-    printf( "\n%s", vec.size() < 3 ? "\n" : "" );
-    if( callAgain )
-        print( r );
-}
+    str[0] = '\0';
+    char * ptr = str;
+    ptr += sprintf( ptr, "{" );
 
-void print( const BinaryTree<EitherCEO>& tree ) {
-    for( const auto& node : tree.raw() )
-        printf( "{%i %i %i / %s} ", node.parent, node.leftChild, 
-                node.rightChild, etostr(node.data) );
-    printf( "\n" );
-    print( std::vector<TreeIterator>{ tree.root() } );
+    bool firstPrint = true;
+    for( int q : state )
+        if( firstPrint ) {
+            ptr += sprintf( ptr, "%d", q );
+            firstPrint = false;
+        } else
+            ptr += sprintf( ptr, ", %d", q );
+
+    sprintf( ptr, "}" );
+    return str;
 }

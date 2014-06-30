@@ -27,5 +27,7 @@ void print( const BinaryTree<Either<char, Epsilon, Operator>>& );
 
 /* Converte para string o objeto passado.
  * Não delete o ponteiro retornado. */
-const char * etostr( const Either<char, Epsilon, Operator, Parentheses> & );
+const char * tostr( const Either<char, Epsilon, Operator, Parentheses> & );
+const char * tostr( const Either<char, Epsilon, Operator>& e );
+const char * tostr( const std::set<int> & );
 #endif // PRINT_H
