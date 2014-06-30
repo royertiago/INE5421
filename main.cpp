@@ -135,22 +135,6 @@ int main () {
     printf( "\nSyntax tree of %s :\n", str.c_str() );
     print( parse(str) );
 
-    str = "ab";
-    printf( "\nMinimum automaton for %s:\n", str.c_str() );
-    print( minimize( compact( toDFA( thompson( parse( str ) )))));
-
-    str = "01*|1";
-    printf( "\nMinimum automaton for %s:\n", str.c_str() );
-    print( minimize( compact( toDFA( thompson( parse( str ) )))));
-    
-    str = "a:b?+";
-    printf( "\nMinimum automaton for %s:\n", str.c_str() );
-    print( minimize( compact( toDFA( thompson( parse( str ) )))));
-
-    str = "ab*c";
-    printf( "\nMinimum automaton for %s:\n", str.c_str() );
-    print( minimize( compact( toDFA( thompson( parse( str ) )))));
-
     DFA< int, char > test = { {0, 1, 2, 3, 4, 5, 6, 7},
                               {'0', '1'},
                               { { {0, '1'}, 5},
@@ -177,5 +161,38 @@ int main () {
     print( test );
     printf( "\n" );
     print( minimize( test ) );
+
+    str = "ab";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+
+    str = "01*|1";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+    
+    str = "a:b?+";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+
+    str = "ab*c";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+
+    printf( "\nReverse of that automaton:\n" );
+    print( 
+            minimize(
+                compact(
+                    toDFA(
+                        automataReversion(
+                            thompson(
+                                parse(
+                                    str
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+         );
     return 0;
 }
