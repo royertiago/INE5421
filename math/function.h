@@ -55,6 +55,10 @@ public:
      * será alterado para fx. */
     void insert( D x, I fx );
 
+    /* Exclui do domínio o valor passado.
+     * Nada é feito caso ele já não pertença ao domínio da função. */
+    void erase( D x );
+
     /* Métodos que permitem iteração sobre os pares da função.
      * O iterador é garantido ser bidirecional.
      * operator* retorna um std::pair<const D, I>. */
@@ -96,10 +100,15 @@ bool Function<D, I>::onDomain( D x ) const {
     return iteratorToPair != values.end();
 }
 
-// Inserção
+// Inserção/remoção
 template< typename D, typename I >
 void Function<D, I>::insert( D x, I fx ) {
     values[x] = fx;
+}
+
+template< typename D, typename I >
+void Function<D, I>::erase( D x ) {
+    values.erase( x );
 }
 
 // Iteradores
