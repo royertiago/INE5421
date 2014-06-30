@@ -7,6 +7,7 @@ using std::printf;
 #include "emptiness.h"
 #include "print.h"
 #include "automaton/deterministic.h"
+#include "automaton/minimization.h"
 #include "automaton/nonDeterministic.h"
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "grammar/grammar.h"
@@ -135,15 +136,46 @@ int main () {
     print( parse(str) );
 
     str = "ab";
-    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
-    print( thompson( parse(str) ) );
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
 
     str = "01*|1";
-    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
-    print( thompson( parse(str) ) );
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
     
     str = "a:b?+";
-    printf( "\nAutomaton for %s, via Thompson:\n", str.c_str() );
-    print( thompson( parse(str) ) );
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+
+    str = "ab*c";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+
+    DFA< int, char > test = { {0, 1, 2, 3, 4, 5, 6, 7},
+                              {'0', '1'},
+                              { { {0, '1'}, 5},
+                                { {0, '0'}, 1},
+                                { {1, '1'}, 2},
+                                { {1, '0'}, 6},
+                                { {2, '1'}, 2},
+                                { {2, '0'}, 0},
+                                { {3, '1'}, 6},
+                                { {3, '0'}, 2},
+                                { {4, '1'}, 5},
+                                { {4, '0'}, 7},
+                                { {5, '1'}, 6},
+                                { {5, '0'}, 2},
+                                { {6, '1'}, 4},
+                                { {6, '0'}, 6},
+                                { {7, '1'}, 2},
+                                { {7, '0'}, 6}
+                              },
+                              { 2 },
+                              0
+    };
+    printf( "\nAutomaton from Hopcroft, pg 68, and minimized:\n" );
+    print( test );
+    printf( "\n" );
+    print( minimize( test ) );
     return 0;
 }
