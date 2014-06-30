@@ -25,10 +25,28 @@ struct DFA {
      * pelo intervalo [begin, end). */
     template< typename ForwardIterator >
     bool accepts( ForwardIterator begin, ForwardIterator end );
+
+    /* Remove o estado e todas as transições partindo dele.
+     * 
+     * O estado passado não deve ser o estado inicial. */
+    void removeState( State );
 };
 
 /* Completa as transições do autômato, adicionando um novo estado 
  * não-terminal se necessário. */
+template< typename State, typename Symbol >
+DFA< State, Symbol > completeTransitions( DFA<State, Symbol> dfa );
+
+// Implementação
+template< typename State, typename Symbol >
+void DFA< State, Symbol >::removeState( State q ) {
+    if( states.erase( q ) > 0 ) {
+        finalStates.erase( q );
+        for( Symbol a : alphabet )
+            delta.erase( {q, a} );
+    }
+}
+
 template< typename State, typename Symbol >
 DFA< State, Symbol > completeTransitions( DFA<State, Symbol> dfa ) {
     bool needNewState = false;
