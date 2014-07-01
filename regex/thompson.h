@@ -5,8 +5,8 @@
 #ifndef THOMPSON_H
 #define THOMPSON_H
 
-#include "compaction.h"
 #include "epsilon.h"
+#include "automaton/compaction.h"
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "regex/tokens.h"
 #include "utility/binaryTree.h"

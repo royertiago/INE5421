@@ -5,6 +5,8 @@
 #ifndef CLOSURE_PROPERTIES_H
 #define CLOSURE_PROPERTIES_H
 
+#include <algorithm>
+#include <iterator>
 #include "automaton/deterministic.h"
 #include "automaton/newState.h"
 #include "automaton/nonDeterministic.h"
@@ -25,10 +27,15 @@ template< typename State1, typename State2, typename Symbol >
 DFA< std::pair<State1, State2>, Symbol > automataSubtraction( 
         DFA< State1, Symbol >, DFA< State2, Symbol > );
 
-/* Constró um autômato cuja linguagem é o reverso
+/* Constrói um autômato cuja linguagem é o reverso
  * da linguagem do autômato passado. */
 template< typename State, typename Symbol >
 NFAe< State, Symbol > automataReversion( NFAe< State, Symbol > );
+
+/* Constrói um autômato cuja linguagem é o complemento
+ * da linguagem do autômato passado. */
+template< typename State, typename Symbol >
+DFA< State, Symbol > complement( DFA< State, Symbol > );
 
 /* Constrói um autômato que executa os dois autômatos simultaneamente,
  * e aceita uma palavra w, e somente se, pred( M1 aceita w, M2 aceita w )
@@ -64,6 +71,40 @@ DFA< std::pair<State1, State2>, Symbol > automataSubtraction(
     return simultaneousRun( M1, M2, [](bool x, bool y){ return x && !y; } );
 }
 
+template< typename State, typename Symbol >
+NFAe< State, Symbol > automataReversion( NFAe< State, Symbol > in ) {
+    NFAe< State, Symbol > out;
+    out.alphabet = in.alphabet;
+
+    /* O conjuto de estados finais será o estado inicial do autômato de
+     * entrada. Adicionaremos um novo estado inicial, que transitará,
+     * por épsilon, para o conjuto de estados finais de 'in'. */
+    out.states = in.states;
+    out.initialState = generateNewState( in );
+    out.states.insert( out.initialState );
+    out.finalStates = {in.initialState};
+
+    /* Reverteremos as direções nas transições para simular uma tentativa
+     * de "desfazer" as transições do autômato. */
+    for( const auto & pair : in.delta )
+        for( State q : pair.second )
+            out.addTransition( q, pair.first.second, pair.first.first );
+    out.delta.insert({out.initialState, epsilon}, in.finalStates);
+
+    return out;
+}
+
+template< typename State, typename Symbol >
+DFA< State, Symbol > complement( DFA< State, Symbol > dfa ) {
+    auto r = completeTransitions( dfa );
+    std::set< State > finalStates;
+    std::set_difference( dfa.states.begin(), dfa.states.end(),
+            dfa.finalStates.begin(), dfa.finalStates.end(),
+            std::inserter( finalStates, finalStates.end() ) );
+    r.finalStates = finalStates;
+    return r;
+}
+
 template< typename State1, typename State2, typename Symbol >
 DFA< std::pair<State1, State2>, Symbol > simultaneousRun( 
         DFA< State1, Symbol > M1, 
@@ -97,29 +138,6 @@ DFA< std::pair<State1, State2>, Symbol > simultaneousRun(
                 dfa.finalStates.insert({q1, q2});
 
     return dfa;
-}
-
-template< typename State, typename Symbol >
-NFAe< State, Symbol > automataReversion( NFAe< State, Symbol > in ) {
-    NFAe< State, Symbol > out;
-    out.alphabet = in.alphabet;
-
-    /* O conjuto de estados finais será o estado inicial do autômato de
-     * entrada. Adicionaremos um novo estado inicial, que transitará,
-     * por épsilon, para o conjuto de estados finais de 'in'. */
-    out.states = in.states;
-    out.initialState = generateNewState( in );
-    out.states.insert( out.initialState );
-    out.finalStates = {in.initialState};
-
-    /* Reverteremos as direções nas transições para simular uma tentativa
-     * de "desfazer" as transições do autômato. */
-    for( const auto & pair : in.delta )
-        for( State q : pair.second )
-            out.addTransition( q, pair.first.second, pair.first.first );
-    out.delta.insert({out.initialState, epsilon}, in.finalStates);
-
-    return out;
 }
 
 #endif // CLOSURE_PROPERTIES_H

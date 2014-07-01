@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <set>
 using std::printf;
-#include "closureProperties.h"
-#include "compaction.h"
 #include "conversion.h"
 #include "emptiness.h"
 #include "print.h"
+#include "automaton/closureProperties.h"
+#include "automaton/compaction.h"
 #include "automaton/deterministic.h"
 #include "automaton/minimization.h"
 #include "automaton/nonDeterministic.h"
