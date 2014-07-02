@@ -52,7 +52,7 @@ DECLARE_TEST( DecisionProceduresTest ) {
                              0
     }; // b+a
     DFA< int, char > a = { {0, 1},
-                           {'a', 'b'},
+                           {'a'},
                            { {{0, 'a'}, 1}
                            },
                            {1},
@@ -67,22 +67,27 @@ DECLARE_TEST( DecisionProceduresTest ) {
     }; // null automaton
 
     b &= Test::TEST_EQUALS( equivalent( axb, ambIb ), true );
+
     b &= Test::TEST_EQUALS( included( amb, ambIb ), true );
     b &= Test::TEST_EQUALS( included( amb, axb ), true );
     b &= Test::TEST_EQUALS( included( ambIb, amb ), false );
     b &= Test::TEST_EQUALS( included( axb, amb ), false );
+
     b &= Test::TEST_EQUALS( disjoint( axb, bxa ), true );
     b &= Test::TEST_EQUALS( disjoint( amb, bma ), true );
-    //  Estes testes lançam exceções:
-//  b &= Test::TEST_EQUALS( disjoint( bma, a ), true );
-//  b &= Test::TEST_EQUALS( disjoint( bxa, a ), false );
+    b &= Test::TEST_EQUALS( disjoint( bma, a ), true );
+    b &= Test::TEST_EQUALS( disjoint( bxa, a ), false );
+    
+    b &= Test::TEST_EQUALS( empty( n ), true );
+    b &= Test::TEST_EQUALS( finite( n ), true );
+    b &= Test::TEST_EQUALS( infinite( n ), false );
 
-//  b &= Test::TEST_EQUALS( empty( a ), false );
-//  b &= Test::TEST_EQUALS( finite( a ), true );
-//  b &= Test::TEST_EQUALS( infinite( a ), false );
-//  b &= Test::TEST_EQUALS( empty( ambIb ), false );
-//  b &= Test::TEST_EQUALS( finite( ambIb ), false );
-//  b &= Test::TEST_EQUALS( infinite( ambIb ), true );
-    printf( "A\n" );
+    b &= Test::TEST_EQUALS( empty( a ), false );
+    b &= Test::TEST_EQUALS( finite( a ), true );
+    b &= Test::TEST_EQUALS( infinite( a ), false );
+
+    b &= Test::TEST_EQUALS( empty( ambIb ), false );
+    b &= Test::TEST_EQUALS( finite( ambIb ), false );
+    b &= Test::TEST_EQUALS( infinite( ambIb ), true );
     return b;
 }

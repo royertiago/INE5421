@@ -115,6 +115,15 @@ DFA< State, Symbol > removeDead( DFA< State, Symbol > dfa ) {
         return false;
     };
 
+    /* true se a transição é para um estado que não está no
+     * conjunto de estados, falso caso a transição seja indefinida
+     * ou ela seja para um estado que está no conjunto de estados. */
+    auto danglingTransition = [&]( State q, Symbol a ) {
+        if( dfa.delta.onDomain({q, a}) )
+            return dfa.states.count( dfa.delta({q, a}) ) == 0;
+        return false;
+    };
+
     while( changed ) {
         changed = false;
         for( State q : dfa.states )
@@ -130,7 +139,7 @@ DFA< State, Symbol > removeDead( DFA< State, Symbol > dfa ) {
      * as transições para estes estados. */
     for( State q : dfa.states )
         for( Symbol a : dfa.alphabet )
-            if( dfa.states.count( dfa.delta({q, a}) ) == 0 )
+            if( danglingTransition(q, a) )
                 dfa.delta.erase({q, a});
 
     return dfa;

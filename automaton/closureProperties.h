@@ -14,9 +14,7 @@
 
 /* Constrói um autômato finito determinístico cuja linguagem reconhecida
  * é a união, interseção ou subtração do primeiro pelo segundo autômato,
- * respectivamente.
- *
- * Assumiremos que os alfabetos dos dois autômatos são idênticos. */
+ * respectivamente. */
 template< typename State1, typename State2, typename Symbol >
 DFA< std::pair<State1, State2>, Symbol > automataUnion( 
         DFA< State1, Symbol >, DFA< State2, Symbol > );
@@ -40,9 +38,7 @@ DFA< State, Symbol > complement( DFA< State, Symbol > );
 /* Constrói um autômato que executa os dois autômatos simultaneamente,
  * e aceita uma palavra w, e somente se, pred( M1 aceita w, M2 aceita w )
  * for verdadeiro.
- * Por exemplo, se pred(x, y) ==  x && y, temos a operação de interseção.
- *
- * Assumiremos que os alfabetos dos dois autômatos são idênticos. */
+ * Por exemplo, se pred(x, y) ==  x && y, temos a operação de interseção. */
 template< typename State1, typename State2, typename Symbol >
 DFA< std::pair<State1, State2>, Symbol > simultaneousRun( 
         DFA< State1, Symbol > M1, 
@@ -111,10 +107,13 @@ DFA< std::pair<State1, State2>, Symbol > simultaneousRun(
         DFA< State2, Symbol > M2, 
         bool (* pred)(bool, bool) )
 {
-    using std::pair;
+    /* Isto garante que todas as transições contendo qualquer
+     * dos alfabetos seja realizada. */
+    M1.alphabet.insert( M2.alphabet.begin(), M2.alphabet.end() );
+    M2.alphabet.insert( M1.alphabet.begin(), M1.alphabet.end() );
     DFA< State1, Symbol > dfa1 = completeTransitions( M1 );
     DFA< State2, Symbol > dfa2 = completeTransitions( M2 );
-    DFA< pair< State1, State2 >, Symbol > dfa;
+    DFA< std::pair< State1, State2 >, Symbol > dfa;
 
     for( State1 q1 : dfa1.states )
         for( State2 q2 : dfa2.states )

@@ -65,10 +65,13 @@ bool finite( DFA< State, Symbol > dfa ) {
 
 template< typename State, typename Symbol >
 bool infinite( DFA< State, Symbol > dfa ) {
-    dfa = minimize( dfa );
+    dfa = removeDead( dfa );
 
     // Vamos procurar por laços no autômato mínimo.
     std::map< State, bool > analyzed;
+    for( State q : dfa.states )
+        analyzed[q] = false;
+
     std::function< bool( State ) > analyze;
     analyze = [&]( State q ) {
         if( analyzed[q] ) return true;
@@ -76,7 +79,7 @@ bool infinite( DFA< State, Symbol > dfa ) {
 
         for( Symbol a : dfa.alphabet )
             if( dfa.delta.onDomain({q, a}) )
-                if( analyze( q ) )
+                if( analyze( dfa.delta({q, a}) ) )
                     return true;
         return false;
     };
