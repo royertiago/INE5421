@@ -191,7 +191,12 @@ TokenVector< Char > explicitConcatenations( const TokenVector< Char >& in ) {
     for( auto e : in ) {
         if( skipNext ) {
             out.push_back( e );
-            skipNext = false;
+            skipNext = (
+                e == Operator::VerticalBar   ||
+                e == Operator::SigmaClosure  ||
+                e == Operator::Concatenation ||
+                e == Parentheses::Left
+                );
             continue;
         }
 
@@ -292,6 +297,7 @@ void buildUnary( TreeIterator     nodeIterator,
             >::type Char;
 
     if( *currentToken == Parentheses::Left ) {
+        ++currentToken;
         buildSubexpression( nodeIterator, currentToken, iterationLimit );
         if( *currentToken != Parentheses::Right )
             throw syntax_error( "Unbalanced parentheses" );

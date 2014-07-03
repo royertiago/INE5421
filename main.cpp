@@ -194,5 +194,10 @@ int main () {
                     )
                 )
          );
+
+    str = "(0|1)+:\\*:\\+";
+    printf( "\nMinimum automaton for %s:\n", str.c_str() );
+    print( parse( str ) );
+    print( minimize( compact( toDFA( thompson( parse( str ) )))));
     return 0;
 }

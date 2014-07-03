@@ -194,7 +194,7 @@ const char * tostr( const Either<char, Epsilon, Operator, Parentheses>& e ) {
             case Operator::VerticalBar:       return "|";
         }
     if( e == Parentheses::Left )
-        return "{";
+        return "(";
     if( e == Parentheses::Right )
         return ")";
 
