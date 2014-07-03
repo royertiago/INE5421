@@ -3,4 +3,4 @@ Testar construtores de cópia/movimento em Either.
 Testar tipos não-triviais em Either.
 Estilo de codificação não é regular com relação às assinaturas das funções,
     especialmente em regex/parsing.h
-Implementar Automata::accepts().
+Corrigir documentação de algorithm/range.h e algorithm/tuple_iterator.h

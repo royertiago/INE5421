@@ -12,6 +12,7 @@ using std::printf;
 #include "automaton/nonDeterministic.h"
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "grammar/grammar.h"
+#include "regex/deSimone.h"
 #include "regex/parsing.h"
 #include "regex/thompson.h"
 #include "test/lib/testList.h"
@@ -208,5 +209,11 @@ int main () {
             printf( "%c", c );
         printf( "\n" );
     }
+
+    str = "(01):(ab)";
+    auto tree = parse( str );
+    print( tree );
+    removeSigmaClosure( tree );
+    print( tree );
     return 0;
 }

@@ -52,9 +52,12 @@ public:
         iterator parent();
 
         /* Retorna um iterador para o filho da esquerda (direita).
-         * Caso não exista, ele é criado com o valor nulo de T. */
-        iterator leftDescent();
-        iterator rightDescent();
+         * Caso não exista, ele é criado com o valor nulo de T.
+         *
+         * Note que, apesar do nome, nem sempre o filho é criado:
+         * ele só o é caso não exista. */
+        iterator makeLeftChild();
+        iterator makeRightChild();
 
         /* "Ascensão" do iterador.
          * Constrói um novo nodo (copiando o atual) que será colocado 
@@ -78,14 +81,14 @@ public:
          *    d   e
          * x é um novo nó, que é o elemento apontado por c agora.
          *
-         * TODO talvez inverter a nomenclatura.
-         * TODO uniformizar a nomenclatura. leftDescent e leftAscent
-         *      possuem comportamento bastante diferente.
-         *
          * É como se o nó atual "produzisse" um ascendente que assumirá
          * seu lugar na árvore. */
         void leftAscent();
         void rightAscent();
+
+        /* Destrói toda a sub-árvore filha deste nodo. */
+        void destroyLeftSubtree();
+        void destroyRightSubtree();
 
         /* Retorna false caso o iterador aponte para o nodo nulo,
          * true caso contrário. */
@@ -145,6 +148,10 @@ private: // Métodos usados internamente
      * Outras referências são mantidas. */
     void leftAscent( Index );
     void rightAscent( Index );
+
+    /* Destrói o nodo passado e todos os nodos abaixo dele.
+     * FIXME: a função destrói nada, na verdade. */
+    void destroy( Index );
 };
 
 // Implementação
@@ -188,6 +195,12 @@ auto BinaryTree<T, Index>::root() const -> const_iterator {
     return const_iterator( this, 0 );
 }
 
+// BinaryTree - raw data
+template< typename T, typename Index >
+auto BinaryTree<T, Index>::raw() const -> const std::vector<node>& {
+    return nodes;
+}
+
 // BinaryTree - decensão
 template< typename T, typename Index >
 void BinaryTree<T, Index>::makeLeftChild( Index index ) {
@@ -200,9 +213,7 @@ void BinaryTree<T, Index>::makeRightChild( Index index ) {
     nodes.push_back({ index, node::null, node::null, T() });
 }
 
-
 // BinaryTree - ascensão
-
 template< typename T, typename Index >
 void BinaryTree<T, Index>::leftAscent( Index index ) {
     /* Copiaremos o nó atual para um novo lugar
@@ -232,10 +243,9 @@ void BinaryTree<T, Index>::rightAscent( Index index ) {
     nodes[childIndex].parent = index;
 }
 
-// BinaryTree - raw data
 template< typename T, typename Index >
-auto BinaryTree<T, Index>::raw() const -> const std::vector<node>& {
-    return nodes;
+void BinaryTree<T, Index>::destroy( Index index ) {
+    // FIXME: nada é feito para otimizar a memória gasta
 }
 
 // Implementação do iterador
@@ -260,13 +270,13 @@ auto BinaryTree<T, Index>::iterator::rightChild() -> iterator {
 }
 
 template< typename T, typename Index >
-auto BinaryTree<T, Index>::iterator::leftDescent() -> iterator {
+auto BinaryTree<T, Index>::iterator::makeLeftChild() -> iterator {
     if( tree->nodes[index].leftChild == node::null )
         tree->makeLeftChild( index );
     return leftChild();
 }
 template< typename T, typename Index >
-auto BinaryTree<T, Index>::iterator::rightDescent() -> iterator {
+auto BinaryTree<T, Index>::iterator::makeRightChild() -> iterator {
     if( tree->nodes[index].rightChild == node::null )
         tree->makeRightChild( index );
     return rightChild();
@@ -279,6 +289,21 @@ void BinaryTree<T, Index>::iterator::leftAscent() {
 template< typename T, typename Index >
 void BinaryTree<T, Index>::iterator::rightAscent() {
     tree->rightAscent( index );
+}
+
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::destroyLeftSubtree() {
+    if( tree->nodes[index].leftChild != node::null ) {
+        tree->destroy( tree->nodes[index].leftChild );
+        tree->nodes[index].leftChild = node::null;
+    }
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::destroyRightSubtree() {
+    if( tree->nodes[index].rightChild != node::null ) {
+        tree->destroy( tree->nodes[index].rightChild );
+        tree->nodes[index].rightChild = node::null;
+    }
 }
 
 template< typename T, typename Index >

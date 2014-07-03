@@ -247,7 +247,7 @@ void buildSubexpression( TreeIterator     nodeIterator,
         nodeIterator.rightAscent();
         *nodeIterator = Operator::VerticalBar;
         ++currentToken;
-        buildUntilBar( nodeIterator.rightDescent(),
+        buildUntilBar( nodeIterator.makeRightChild(),
                        currentToken, iterationLimit );
     }
 }
@@ -264,7 +264,7 @@ void buildUntilBar( TreeIterator     nodeIterator,
         nodeIterator.rightAscent();
         *nodeIterator = Operator::Concatenation;
         ++currentToken;
-        buildUntilCat( nodeIterator.rightDescent(), 
+        buildUntilCat( nodeIterator.makeRightChild(), 
                        currentToken, iterationLimit );
     }
 }
@@ -281,7 +281,7 @@ void buildUntilCat( TreeIterator     nodeIterator,
         nodeIterator.rightAscent();
         *nodeIterator = Operator::SigmaClosure;
         ++currentToken;
-        buildUnary( nodeIterator.rightDescent(),
+        buildUnary( nodeIterator.makeRightChild(),
                     currentToken, iterationLimit );
     }
 }
