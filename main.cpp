@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <set>
 using std::printf;
+#include "acceptanceList.h"
 #include "conversion.h"
 #include "emptiness.h"
 #include "print.h"
@@ -198,6 +199,14 @@ int main () {
     str = "(0|1)+:\\*:\\+";
     printf( "\nMinimum automaton for %s:\n", str.c_str() );
     print( parse( str ) );
-    print( minimize( compact( toDFA( thompson( parse( str ) )))));
+    auto arith = minimize( compact( toDFA( thompson( parse( str ) ))));
+    print( arith );
+
+    printf( "All 5-char words accepted by this automaton:\n" );
+    for( const std::vector< char >& v : acceptanceList( arith, 5 ) ) {
+        for( char c : v )
+            printf( "%c", c );
+        printf( "\n" );
+    }
     return 0;
 }

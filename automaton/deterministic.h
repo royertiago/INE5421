@@ -24,7 +24,7 @@ struct DFA {
     /* Determina se o autômato aceita ou não a palavra delimitada
      * pelo intervalo [begin, end). */
     template< typename ForwardIterator >
-    bool accepts( ForwardIterator begin, ForwardIterator end );
+    bool accepts( ForwardIterator begin, ForwardIterator end ) const;
 
     /* Remove o estado e todas as transições partindo dele.
      * 
@@ -37,7 +37,27 @@ struct DFA {
 template< typename State, typename Symbol >
 DFA< State, Symbol > completeTransitions( DFA<State, Symbol> dfa );
 
+
 // Implementação
+
+template< typename State, typename Symbol >
+template< typename ForwardIterator >
+bool DFA< State, Symbol >::accepts( ForwardIterator begin, 
+                                     ForwardIterator end ) const
+{
+    State q = initialState;
+    for( ; begin != end; ++begin )
+        if( delta.onDomain( {q, *begin} ) )
+            q = delta({q, *begin});
+        else
+            return false;
+
+    if( finalStates.count( q ) > 0 )
+        return true;
+    else
+        return false;
+}
+
 template< typename State, typename Symbol >
 void DFA< State, Symbol >::removeState( State q ) {
     if( states.erase( q ) > 0 ) {
