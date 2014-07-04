@@ -157,6 +157,10 @@ void print( const std::vector<TreeIterator>& vec ) {
     std::vector<TreeIterator> r;
     bool callAgain = false;
     int printSize = 32 / vec.size();
+    if( printSize == 0 ) {
+        printf( "Tree too deep\n" );
+        return;
+    }
     for( TreeIterator it : vec ) {
         if( !it ) {
             r.push_back( it ); r.push_back( it );

@@ -243,5 +243,12 @@ int main () {
     print( tree );
     removeEpsilon( tree );
     print( tree );
+
+    str = "(ab)?(a|b)";
+    printf( "Tree for %s - and right-threaded:\n\n", str.c_str() );
+    tree = parse( str );
+    print( tree );
+    addRightThreads( tree.root() );
+    print( tree );
     return 0;
 }

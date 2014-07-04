@@ -6,3 +6,7 @@ Estilo de codificação não é regular com relação às assinaturas das funç�
 Corrigir documentação de algorithm/range.h e algorithm/tuple_iterator.h
 Alterar BinaryTree::setLeftChild para alterar o pai do nodo filho após
     alterar o filho do nodo pai.
+Melhorar documentação introdutória de utility/binaryTree.h
+Refatorar utility/binaryTree.h para que os algoritmos sejam externos
+    às classes. left/rightAscent/Collapse não deveriam estar chumbados
+    como métodos do iterador.
