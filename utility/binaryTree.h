@@ -4,6 +4,7 @@
 #ifndef BINARY_TREE_H
 #define BINARY_TREE_H
 
+#include <cstddef> // nullptr_t
 #include <vector>
 #include <type_traits>
 
@@ -19,6 +20,9 @@ public:
     typedef const T& const_reference;
     typedef       T* pointer;
     typedef const T* const_pointer;
+
+    class iterator;
+    class const_iterator;
 
     /* Classe interna, que será o iterador da árvore.
      * Como ela está numa área pública, ela pode ser
@@ -86,11 +90,34 @@ public:
         void leftAscent();
         void rightAscent();
 
+        /* Colapsa a subárvore da esquerda/direita.
+         * Este método reverte leftAscent() / rightAscent(): dada uma árvore
+         *      a
+         *     / \
+         *    b   c
+         * executar collapseRight() no nodo 'a' resulta em
+         *      c
+         * O nodo b é deletado da árvore. */
+        void collapseLeft();
+        void collapseRight();
+
         /* Destrói toda a sub-árvore filha deste nodo. */
         void destroyLeftSubtree();
         void destroyRightSubtree();
 
-        /* Retorna false caso o iterador aponte para o nodo nulo,
+        /* Altera o filho da esquerda/direita para ser o nó apontado
+         * pelo iterador passado, ou o nodo nulo na terceira/sexta versão.
+         *
+         * Não será feita checagem alguma para garantir que esta estrutura
+         * continuará sendo uma árvore. */
+        void setLeftChild( iterator );
+        void setLeftChild( const_iterator );
+        void setLeftChild( std::nullptr_t );
+        void setRightChild( iterator );
+        void setRightChild( const_iterator );
+        void setRightChild( std::nullptr_t );
+
+        /* Retorna false caso o iterador aponta para o nodo nulo,
          * true caso contrário. */
         operator bool();
 
@@ -149,9 +176,17 @@ private: // Métodos usados internamente
     void leftAscent( Index );
     void rightAscent( Index );
 
-    /* Destrói o nodo passado e todos os nodos abaixo dele.
+    /* Efetua o colapso à esquerda (direita) do nodo especificado.
+     * O nodo especificado será modificado para conter o nó filho.
+     * Outras referências são mantidas. */
+    void collapseLeft( Index );
+    void collapseRight( Index );
+
+    /* Destrói o nodo passado na primeira versão, e o nodo passado
+     * e todos os subnós na segunda versão.
      * FIXME: a função destrói nada, na verdade. */
     void destroy( Index );
+    void recursivelyDestroy( Index );
 };
 
 // Implementação
@@ -201,7 +236,7 @@ auto BinaryTree<T, Index>::raw() const -> const std::vector<node>& {
     return nodes;
 }
 
-// BinaryTree - decensão
+// BinaryTree - criação de filhos
 template< typename T, typename Index >
 void BinaryTree<T, Index>::makeLeftChild( Index index ) {
     nodes[index].leftChild = nodes.size();
@@ -243,19 +278,66 @@ void BinaryTree<T, Index>::rightAscent( Index index ) {
     nodes[childIndex].parent = index;
 }
 
+// BinaryTree - queda (colapso)
 template< typename T, typename Index >
-void BinaryTree<T, Index>::destroy( Index index ) {
-    // FIXME: nada é feito para otimizar a memória gasta
+void BinaryTree<T, Index>::collapseLeft( Index index ) {
+    /* Iremos destruir os nodos da sub-árvore da direita,
+     * copiar o filho da esquerda para o nó atual e arrumar
+     * as referências: o nó recém-copiado deve ter seu pai
+     * corrigido e os filhos do antigo nó devem ter seus
+     * pais trocados de lugar. */
+    Index parentIndex = nodes[index].parent;
+    Index childIndex = nodes[index].leftChild;
+    if( nodes[index].rightChild != node::null )
+        recursivelyDestroy( nodes[index].rightChild );
+
+    nodes[index] = nodes[childIndex];
+    nodes[index].parent = parentIndex;
+    destroy( childIndex );
+    if( nodes[index].leftChild != node::null )
+        nodes[nodes[index].leftChild].parent = index;
+    if( nodes[index].rightChild != node::null )
+        nodes[nodes[index].rightChild].parent = index;
 }
 
+template< typename T, typename Index >
+void BinaryTree<T, Index>::collapseRight( Index index ) {
+    Index parentIndex = nodes[index].parent;
+    Index childIndex = nodes[index].rightChild;
+    if( nodes[index].leftChild != node::null )
+        recursivelyDestroy( nodes[index].leftChild );
+
+    nodes[index] = nodes[childIndex];
+    nodes[index].parent = parentIndex;
+    destroy( childIndex );
+    if( nodes[index].leftChild != node::null )
+        nodes[nodes[index].leftChild].parent = index;
+    if( nodes[index].rightChild != node::null )
+        nodes[nodes[index].rightChild].parent = index;
+}
+
+// BinaryTree - destruição
+template< typename T, typename Index >
+void BinaryTree<T, Index>::destroy( Index index ) {
+    // FIXME: nada é feito para recuperar a memória perdida
+}
+
+template< typename T, typename Index >
+void BinaryTree<T, Index>::recursivelyDestroy( Index index ) {
+    // FIXME: nada é feito para recuperar a memória perdida
+}
+
+
 // Implementação do iterador
-// iterator - construtor
+
+// Construtor
 template< typename T, typename Index >
 BinaryTree<T, Index>::iterator::iterator( BinaryTree<T, Index>* t, Index i ) :
     tree( t ),
     index( i )
 {}
 
+// Navegação
 template< typename T, typename Index >
 auto BinaryTree<T, Index>::iterator::parent() -> iterator {
     return iterator( tree, tree->nodes[index].parent );
@@ -269,6 +351,7 @@ auto BinaryTree<T, Index>::iterator::rightChild() -> iterator {
     return iterator( tree, tree->nodes[index].rightChild );
 }
 
+// Criação de filhos
 template< typename T, typename Index >
 auto BinaryTree<T, Index>::iterator::makeLeftChild() -> iterator {
     if( tree->nodes[index].leftChild == node::null )
@@ -282,6 +365,7 @@ auto BinaryTree<T, Index>::iterator::makeRightChild() -> iterator {
     return rightChild();
 }
 
+// Ascenção
 template< typename T, typename Index >
 void BinaryTree<T, Index>::iterator::leftAscent() {
     tree->leftAscent( index );
@@ -291,21 +375,61 @@ void BinaryTree<T, Index>::iterator::rightAscent() {
     tree->rightAscent( index );
 }
 
+// Queda (colapsamento)
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::collapseLeft() {
+    tree->collapseLeft( index );
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::collapseRight() {
+    tree->collapseRight( index );
+}
+
+// Destruir subárvores
 template< typename T, typename Index >
 void BinaryTree<T, Index>::iterator::destroyLeftSubtree() {
     if( tree->nodes[index].leftChild != node::null ) {
-        tree->destroy( tree->nodes[index].leftChild );
+        tree->recursivelyDestroy( tree->nodes[index].leftChild );
         tree->nodes[index].leftChild = node::null;
     }
 }
 template< typename T, typename Index >
 void BinaryTree<T, Index>::iterator::destroyRightSubtree() {
     if( tree->nodes[index].rightChild != node::null ) {
-        tree->destroy( tree->nodes[index].rightChild );
+        tree->recursivelyDestroy( tree->nodes[index].rightChild );
         tree->nodes[index].rightChild = node::null;
     }
 }
 
+// Alterar "ponteiros"
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setLeftChild( iterator it ) {
+    tree->nodes[index].leftChild = it.index;
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setLeftChild( const_iterator it ) {
+    tree->nodes[index].leftChild = it.index;
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setLeftChild( std::nullptr_t ) {
+    tree->nodes[index].leftChild = node::null;
+}
+
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setRightChild( iterator it ) {
+    tree->nodes[index].rightChild = it.index;
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setRightChild( const_iterator it ) {
+    tree->nodes[index].rightChild = it.index;
+}
+template< typename T, typename Index >
+void BinaryTree<T, Index>::iterator::setRightChild( std::nullptr_t ) {
+    tree->nodes[index].rightChild = node::null;
+}
+
+
+// Funcionalidade básica
 template< typename T, typename Index >
 BinaryTree<T, Index>::iterator::operator bool() {
     return index != node::null && tree != nullptr;

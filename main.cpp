@@ -215,5 +215,33 @@ int main () {
     print( tree );
     removeSigmaClosure( tree );
     print( tree );
+
+    str = "&(ab)|&*";
+    printf( "Tree for %s - and without epsilon:\n\n", str.c_str() );
+    tree = parse( str );
+    print( tree );
+    removeEpsilon( tree );
+    print( tree );
+
+    str = "(a&b&)+";
+    printf( "Tree for %s - and without epsilon:\n\n", str.c_str() );
+    tree = parse( str );
+    print( tree );
+    removeEpsilon( tree );
+    print( tree );
+
+    str = "a|b|&";
+    printf( "Tree for %s - and without epsilon:\n\n", str.c_str() );
+    tree = parse( str );
+    print( tree );
+    removeEpsilon( tree );
+    print( tree );
+
+    str = "(&:(ab)):&";
+    printf( "Tree for %s - and without epsilon:\n\n", str.c_str() );
+    tree = parse( str );
+    print( tree );
+    removeEpsilon( tree );
+    print( tree );
     return 0;
 }

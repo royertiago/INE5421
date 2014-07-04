@@ -55,11 +55,6 @@ void removeSigmaClosure( BinaryTree< Either<Char, Epsilon, Operator> >& tree )
     removeSigmaClosure( tree.root() );
 }
 
-template< typename Char >
-void removeEpsilon( BinaryTree< Either<Char, Epsilon, Operator> >& tree ) {
-    removeEpsilon( tree.root() );
-}
-
 /* Árvore original:
  *     :
  *    / \
@@ -110,5 +105,104 @@ void removeSigmaClosure( TreeIterator iterator ) {
             return;
     }
     throw token_error( "Extraneous operator found" ); 
+}
+
+template< typename Char >
+void removeEpsilon( BinaryTree< Either<Char, Epsilon, Operator> >& tree ) {
+    removeEpsilon( tree.root() );
+}
+
+template< typename TreeIterator >
+bool removeEpsilon( TreeIterator iterator ) {
+    if( iterator->template is<Epsilon>() )
+        return true;
+    if( !iterator->template is<Operator>() )
+        return false;
+
+    switch( iterator->template operator Operator() ) {
+        case Operator::KleneeClosure:
+        case Operator::PositiveClosure:
+        case Operator::Optional:
+            /* O fecho de Klenne, fecho positivo e opcional do épsilon
+             * é igual a épsilon; caso a subárvore seja épsilon,
+             * a destruiremos e substituiremos o nodo atual por épsilon. */
+            if( removeEpsilon( iterator.leftChild() ) ) {
+                iterator.destroyLeftSubtree();
+                *iterator = epsilon;
+                return true;
+            }
+            return false;
+
+        case Operator::Concatenation:
+            /* Para a concatenação temos quatro casos:
+             *  x       . y       = x.y (se mantém)
+             *  x       . épsilon = x
+             *  épsilon . y       = y
+             *  épsilon . épsilon = épsilon
+             * O segundo caso aparece caso a remoção de épsilons na
+             * subárvore à direita resulte em épsilon; é o caso
+             * do primeiro if.
+             *
+             * Neste caso, destruamos a subárvore da direita e troquemos
+             * a concatenação pela subárvore da esquerda. Para pegar
+             * o quarto caso já neste if, basta analisar a subárvore da
+             * esquerda, que agora é o nodo atual.
+             *
+             * O terceiro caso ocorre na situação contrária: a análise
+             * da subárvore da esquerda concluiu que lá só tem épsilon.
+             * Note que agora não precisamos fazer a análise da subárvore
+             * da direita aqui, pois ela já foi feita no teste anterior
+             * e já sabemos que a subárvore da direita não é épsilon.
+             *
+             * Finalmente, o return false lida com o primeiro caso. */
+            if( removeEpsilon( iterator.rightChild() ) ) {
+                iterator.destroyRightSubtree();
+                iterator.collapseLeft();
+                return removeEpsilon( iterator );
+            }
+            if( removeEpsilon( iterator.leftChild() ) ) {
+                iterator.destroyLeftSubtree();
+                iterator.collapseRight();
+            }
+            return false;
+
+        case Operator::VerticalBar:
+            /* Os quatro casos daqui são
+             * x       | y       = x | y (se mantém)
+             * x       | épsilon = x?
+             * épsilon | y       = y?
+             * épsilon | épsilon = épsilon */
+            if( removeEpsilon( iterator.rightChild() ) ) {
+                iterator.destroyRightSubtree();
+                *iterator = Operator::Optional;
+                return removeEpsilon( iterator );
+            }
+            if( removeEpsilon( iterator.leftChild() ) ) {
+                iterator.destroyLeftSubtree();
+                *iterator = Operator::Optional;
+                iterator.setLeftChild( iterator.rightChild() );
+                iterator.setRightChild( nullptr );
+            }
+            return false;
+
+        case Operator::SigmaClosure:
+            /* x       : y       = x : y (se mantém)
+             * x       : épsilon = x+
+             * épsilon : y       = y*
+             * épsilon : épsilon = épsilon */
+            if( removeEpsilon( iterator.rightChild() ) ) {
+                iterator.destroyRightSubtree();
+                *iterator = Operator::PositiveClosure;
+                return removeEpsilon( iterator );
+            }
+            if( removeEpsilon( iterator.leftChild() ) ) {
+                iterator.destroyLeftSubtree();
+                *iterator = Operator::KleneeClosure;
+                iterator.setLeftChild( iterator.rightChild() );
+                iterator.setRightChild( nullptr );
+            }
+            return false;
+    }
+    throw token_error( "Extraneous operator found" );
 }
 #endif // DE_SIMONE_H
