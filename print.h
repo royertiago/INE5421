@@ -24,6 +24,22 @@ void print( const NFAe< int, char >& );
 void print( const Grammar< int, char >& );
 void print( const TokenVector< char >& );
 void print( const BinaryTree<Either<char, Epsilon, Operator>>& );
+void print( const std::set< 
+            BinaryTree<Either<char, Epsilon, Operator>>::iterator 
+        >& );
+void print( const std::pair<
+                std::set<
+                    BinaryTree<Either<char, Epsilon, Operator>>::iterator
+                >,
+                std::map<
+                    BinaryTree<Either<char, Epsilon, Operator>>::iterator,
+                    std::set<
+                        BinaryTree<Either<char, Epsilon, Operator>>::iterator
+                    >
+                >
+            > &
+        );
+                    
 
 /* Converte para string o objeto passado.
  * Não delete o ponteiro retornado. */

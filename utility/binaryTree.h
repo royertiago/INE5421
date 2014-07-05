@@ -46,6 +46,10 @@ public:
          * possa ser utilizado. */
         iterator() = default;
 
+        /* Constrói um iterador nulo.
+         * Note que o construtor é implícito. */
+        iterator( nullptr_t );
+
         /* Retorna iteradores para os elementos especificados.
          * Caso não existam, um iterador apontando para o nodo nulo
          * é retornado.
@@ -119,11 +123,28 @@ public:
 
         /* Retorna false caso o iterador aponta para o nodo nulo,
          * true caso contrário. */
-        operator bool();
+        operator bool() const;
+        /* Negação do operador acima. */
+        bool operator!() const;
 
         /* Retorna o elemento apontado por este iterador. */
-        reference operator*();
-        pointer operator->();
+              reference operator*();
+        const_reference operator*() const;
+              pointer operator->();
+        const_pointer operator->() const;
+
+        /* Função para fins de debug - retorna o índice do iterador. */
+        Index rawIndex() const;
+
+        /* Função de conveniência, para uso em std::map e std::set.
+         * A relação pai/filho entre os nós não é considerada,
+         * os iteradores são assumidos pertencerem à mesma árvore,
+         * e iteradores nulos são considerados menores que não-nulos. */
+        friend bool operator<( const iterator& lhs, const iterator& rhs ) {
+            if( !rhs ) return false;
+            if( !lhs ) return true;
+            return lhs.index < rhs.index;
+        }
     };
 
     class const_iterator {
@@ -337,6 +358,12 @@ BinaryTree<T, Index>::iterator::iterator( BinaryTree<T, Index>* t, Index i ) :
     index( i )
 {}
 
+template< typename T, typename Index >
+BinaryTree<T, Index>::iterator::iterator( std::nullptr_t ) :
+    tree( nullptr ),
+    index( node::null )
+{}
+
 // Navegação
 template< typename T, typename Index >
 auto BinaryTree<T, Index>::iterator::parent() -> iterator {
@@ -431,8 +458,13 @@ void BinaryTree<T, Index>::iterator::setRightChild( std::nullptr_t ) {
 
 // Funcionalidade básica
 template< typename T, typename Index >
-BinaryTree<T, Index>::iterator::operator bool() {
+BinaryTree<T, Index>::iterator::operator bool() const {
     return index != node::null && tree != nullptr;
+}
+
+template< typename T, typename Index >
+bool BinaryTree<T, Index>::iterator::operator !() const {
+    return !operator bool();
 }
 
 template< typename T, typename Index >
@@ -441,8 +473,23 @@ T& BinaryTree<T, Index>::iterator::operator*() {
 }
 
 template< typename T, typename Index >
+const T& BinaryTree<T, Index>::iterator::operator*() const {
+    return tree->nodes[index].data;
+}
+
+template< typename T, typename Index >
 T* BinaryTree<T, Index>::iterator::operator->() {
     return &tree->nodes[index].data;
+}
+
+template< typename T, typename Index >
+const T* BinaryTree<T, Index>::iterator::operator->() const {
+    return &tree->nodes[index].data;
+}
+
+template< typename T, typename Index >
+Index BinaryTree<T, Index>::iterator::rawIndex() const {
+    return index;
 }
 
 // Implementação do iterador constante

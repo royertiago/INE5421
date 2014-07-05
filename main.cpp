@@ -250,5 +250,23 @@ int main () {
     print( tree );
     addRightThreads( tree.root() );
     print( tree );
+
+    str = "abc";
+    tree = parse( str );
+    removeSigmaClosure( tree );
+    removeEpsilon( tree );
+    print( tree );
+    addRightThreads( tree.root() );
+    auto pair = buildComposition( tree.root() );
+    print( pair );
+
+    str = "(a|b)c";
+    tree = parse( str );
+    removeSigmaClosure( tree );
+    removeEpsilon( tree );
+    print( tree );
+    addRightThreads( tree.root() );
+    pair = buildComposition( tree.root() );
+    print( pair );
     return 0;
 }

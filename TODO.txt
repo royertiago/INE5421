@@ -10,3 +10,7 @@ Melhorar documentação introdutória de utility/binaryTree.h
 Refatorar utility/binaryTree.h para que os algoritmos sejam externos
     às classes. left/rightAscent/Collapse não deveriam estar chumbados
     como métodos do iterador.
+Trocar iterator->template operator Operator() por static_cast<Operator>.
+Implementar operator<( iterator, const_iterator ) e similares.
+Simplificar assinatura das últimas funções de print.h.
+Testar buildComposition, de regex/deSimone.h
