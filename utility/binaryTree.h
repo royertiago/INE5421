@@ -1,5 +1,17 @@
 /* binaryTree.h
- * Árvore binária.
+ * Implementação de uma árvore binária.
+ *
+ * Esta classe contém funções e iteradores para uma árvore binária.
+ * Ela está estruturada de forma a manter todos os nós num vetor
+ * interno.
+ *
+ * Uma peculiariedade desta classe é o fato de a deleção de um elemento
+ * da árvore ser "preguiçosa": o elemento só é deletado de fato quando
+ * um elemento novo seja inserido. E, neste caso, ele não é deletado: 
+ * o operador de atribuição do elemento é utilizado para subsituir o antigo,
+ * que não está sendo usado, pelo que acaba de ser inserido.
+ *
+ * TODO: na verdade, nada é deletado; a deleção não foi implementada.
  */
 #ifndef BINARY_TREE_H
 #define BINARY_TREE_H

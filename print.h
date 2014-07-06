@@ -16,6 +16,8 @@
 #include "utility/binaryTree.h"
 #include "utility/either.h"
 
+typedef BinaryTree<Either<char, Epsilon, Operator>>::iterator EitherIterator;
+
 void print( const DFA< int, char >& );
 void print( const DFA< std::set<int>, char >& );
 void print( const DFA< std::pair<int, int>, char >& );
@@ -24,21 +26,11 @@ void print( const NFAe< int, char >& );
 void print( const Grammar< int, char >& );
 void print( const TokenVector< char >& );
 void print( const BinaryTree<Either<char, Epsilon, Operator>>& );
-void print( const std::set< 
-            BinaryTree<Either<char, Epsilon, Operator>>::iterator 
-        >& );
+void print( const std::set< EitherIterator >& );
 void print( const std::pair<
-                std::set<
-                    BinaryTree<Either<char, Epsilon, Operator>>::iterator
-                >,
-                std::map<
-                    BinaryTree<Either<char, Epsilon, Operator>>::iterator,
-                    std::set<
-                        BinaryTree<Either<char, Epsilon, Operator>>::iterator
-                    >
-                >
-            > &
-        );
+                std::set< EitherIterator >,
+                std::map< EitherIterator, std::set< EitherIterator > >
+            > & );
                     
 
 /* Converte para string o objeto passado.

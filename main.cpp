@@ -260,7 +260,25 @@ int main () {
     auto pair = buildComposition( tree.root() );
     print( pair );
 
-    str = "(a|b)c";
+    str = "(a|b)c*";
+    tree = parse( str );
+    removeSigmaClosure( tree );
+    removeEpsilon( tree );
+    print( tree );
+    addRightThreads( tree.root() );
+    pair = buildComposition( tree.root() );
+    print( pair );
+
+    str = "(a|bc)+d?";
+    tree = parse( str );
+    removeSigmaClosure( tree );
+    removeEpsilon( tree );
+    print( tree );
+    addRightThreads( tree.root() );
+    pair = buildComposition( tree.root() );
+    print( pair );
+
+    str = "ab*c:d";
     tree = parse( str );
     removeSigmaClosure( tree );
     removeEpsilon( tree );

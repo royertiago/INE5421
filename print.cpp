@@ -185,13 +185,11 @@ void print( const BinaryTree<EitherCEO>& tree ) {
     print( std::vector<TreeIterator>{ tree.root() } );
 }
 
-void print( const std::set< 
-            BinaryTree<Either<char, Epsilon, Operator>>::iterator 
-        >& set ) {
+void print( const std::set< EitherIterator >& set ) {
     const char * str = "";
     for( auto iterator : set ) {
         if( iterator )
-            printf( "(%d,%s)%s", iterator.rawIndex(), tostr(*iterator), str );
+            printf( "%s(%d,%s)", str, iterator.rawIndex(), tostr(*iterator) );
         else
             printf( "(null)%s", str );
         str = " ";
@@ -199,17 +197,9 @@ void print( const std::set<
 }
 
 void print( const std::pair<
-                std::set<
-                    BinaryTree<Either<char, Epsilon, Operator>>::iterator
-                >,
-                std::map<
-                    BinaryTree<Either<char, Epsilon, Operator>>::iterator,
-                    std::set<
-                        BinaryTree<Either<char, Epsilon, Operator>>::iterator
-                    >
-                >
-            > & pair
-        )
+                std::set< EitherIterator >,
+                std::map< EitherIterator, std::set< EitherIterator > >
+            > & pair )
 {
     printf( "Initial: " );
     print( pair.first );

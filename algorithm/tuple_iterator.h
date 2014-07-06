@@ -16,51 +16,44 @@ template< typename T >
 bool operator==( const tuple_iterator<T>&, const tuple_iterator<T>& );
 
 template< typename T >
-bool operator< ( const tuple_iterator<T>&, const tuple_iterator<T>& );
-
-template< typename T >
 class tuple_iterator {
     std::vector< T > currentTuple;
     std::set< T > base;
 
 public:
     /* Constrói um iterador sobre tuplas homogêneas que itera sobre
-     * o conjunto passado, com tuplas fixas com o tamanho especificado. */
+     * o conjunto passado, iniciando com tuplas do tamanho passado. */
     tuple_iterator( std::set<T>, std::size_t );
 
-    /* Retorna a tupla atual.
-     * Note que o retorno é constante. */
+    /* Retorna a tupla atual. */
     const std::vector< T >& operator*() const;
 
     /* Avança a iteração.
      * As tuplas estão ordenadas lexicograficamente, com o elemento
-     * mais significativo sendo o mais próximo do fim.
+     * mais próximo do fim como sendo o mais significativo.
      * Caso a última tupla de determinado tamanho seja atingido, a
      * tupla é aumentada de tamanho. */
     tuple_iterator< T >& operator++();
     tuple_iterator< T > operator++( int );
 
     /* Retrocede a iteração.
-     * Assume-se que seja possível; isto é, não */
+     * Assume-se que seja possível; isto é, a tupla atual não é uma
+     * tupla unária cujo primeiro elemento é o primeiro do domínio. */
     tuple_iterator< T >& operator--();
     tuple_iterator< T > operator--( int );
 
+    /* Comparação.
+     * O teste é feito contra a tupla atual, ignorando o conjunto
+     * sobre o qual a tupla está definida. */
     friend bool operator== <>(
-            const tuple_iterator<T>&, const tuple_iterator<T>& );
-    friend bool operator< <> (
             const tuple_iterator<T>&, const tuple_iterator<T>& );
 
 private:
-    bool advance( T& t ) {
-        auto it = base.find( t );
-        ++it;
-        if( it == base.end() ) {
-            t = *base.begin();
-            return false;
-        }
-        t = *it;
-        return true;
-    }
+    /* Incrementa o elemento passado, segundo o conjunto base.
+     * Caso o elemento de fato seja incrementado, a função retorna
+     * true; caso o fim do conjunto seja atingido, o elemento é
+     * reiniciado para base.begin() e o método retorna false. */
+    bool advance( T& t );
 };
 
 /* Constrói um intervalo que conterá todas as "tuplas" sobre
@@ -68,21 +61,8 @@ private:
 template< typename T >
 range< tuple_iterator<T> > tuple_range( std::set< T >, std::size_t );
 
-template< typename T >
-bool operator<( const tuple_iterator<T>&, const tuple_iterator<T>& );
-template< typename T >
-bool operator>( const tuple_iterator<T>&, const tuple_iterator<T>& );
-template< typename T >
-bool operator<=( const tuple_iterator<T>&, const tuple_iterator<T>& );
-template< typename T >
-bool operator>=( const tuple_iterator<T>&, const tuple_iterator<T>& );
-template< typename T >
-bool operator==( const tuple_iterator<T>&, const tuple_iterator<T>& );
-template< typename T >
-bool operator!=( const tuple_iterator<T>&, const tuple_iterator<T>& );
 
 // Implementação
-
 template< typename T >
 tuple_iterator<T>::tuple_iterator( std::set<T> base, std::size_t s ) :
     currentTuple( s, *base.begin() ),
@@ -115,34 +95,15 @@ tuple_iterator<T> tuple_iterator<T>::operator++( int ) {
 }
 
 template< typename T >
-tuple_iterator<T>& tuple_iterator<T>::operator--() {
-    for( auto& t : currentTuple )
-        if( retrocede( t ) )
-            return *this;
-
-    currentTuple.pop_back();
-    return *this;
-}
-
-template< typename T >
-tuple_iterator<T> tuple_iterator<T>::operator--( int ) {
-    auto tmp = *this;
-    operator--();
-    return tmp;
-}
-
-template< typename T >
-bool operator<( const tuple_iterator<T>& lhs, const tuple_iterator<T>& rhs ) {
-    if( lhs.currentTuple.size() < rhs.currentTuple.size() )
-        return true;
-    if( lhs.currentTuple.size() > rhs.currentTuple.size() )
+bool tuple_iterator<T>::advance( T& t ) {
+    auto it = base.find( t );
+    ++it;
+    if( it == base.end() ) {
+        t = *base.begin();
         return false;
-    for( std::size_t i = 0; i < lhs.currentTuple.size(); ++i )
-        if( lhs.currentTuple[i] < rhs.currentTuple[i] )
-            return true;
-        else if( lhs.currentTuple[i] > rhs.currentTuple[i] )
-            return false;
-    return false;
+    }
+    t = *it;
+    return true;
 }
 
 template< typename T >
@@ -150,21 +111,6 @@ range< tuple_iterator<T> > tuple_range( std::set< T > base, std::size_t n ) {
     return range< tuple_iterator<T> >(
             tuple_iterator<T>( base, n ), tuple_iterator<T>( base, n+1 )
             );
-}
-
-template< typename T >
-bool operator>( const tuple_iterator<T>& lhs, const tuple_iterator<T>& rhs ) {
-    return rhs < lhs;
-}
-
-template< typename T >
-bool operator<=( const tuple_iterator<T>& lhs, const tuple_iterator<T>& rhs ) {
-    return !( lhs > rhs );
-}
-
-template< typename T >
-bool operator>=( const tuple_iterator<T>& lhs, const tuple_iterator<T>& rhs ) {
-    return !( lhs < rhs );
 }
 
 template< typename T >

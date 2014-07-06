@@ -350,12 +350,17 @@ buildComposition( TreeIterator root ) {
      * pelo mesmo nodo várias vezes. Para evitar recursão infinita,
      * marcaremos neste mapa quais nodos já foram visitados.
      *
-     * A função resetStatus (definida adiante) zera este mapeamento. */
-    std::map< TreeIterator, bool > analyzed;
+     * São feitas duas operações: aprofundar e avançar (ou descer e subir).
+     * Cada operação só pode ocorrer uma vez em cada elemento, mas podem
+     * ocorrer ambas as operações; portanto, precisamos de dois mapeamentos.
+     *
+     * A função resetStatus (definida adiante) zera estes mapeamentos. */
+    std::map< TreeIterator, bool > deepened;
+    std::map< TreeIterator, bool > advanced;
 
     auto resetStatus = [&]() {
         for( TreeIterator iterator : nodeList )
-            analyzed[iterator] = false;
+            deepened[iterator] = advanced[iterator] = false;
         // Note que o mapeamento é construído na primeira execução.
     };
 
@@ -373,19 +378,22 @@ buildComposition( TreeIterator root ) {
      * advance tentará alcançar o próximo nodo, após já ter transitado
      * pelos nodos da sub-árvore atual.
      * Por exemplo:
-     *          .
-     *         /4\
-     *        |   b
-     *       /2\  5
-     *      a   c
-     *      1   3
+     *          .                     .
+     *         / \                   /4\
+     *        |   b   Numerando:    |   b
+     *       / \                   /2\  5
+     *      a   c                 a   c
+     *                            1   3
+     * Quando esta expressão regular for reconhecida a partir do topo
+     * (nó 4), a próxima transição têm de ser por 'a', no nodo 1, ou
+     * por 'b', no nodo 3. O objetivo de deepen(4) é montar o conjunto
+     * dos nós que possivelmente conterão a primeira transição do autômato
+     * (o conjunto {1, 3} neste caso).
+     *
      * Executar deepen no nodo 4 irá redirecionar a execução para o nodo 2,
      * tentando aprofundar. Por sua vez, deepen(2) se dividirá pelos nodos
      * 1 e 3, também aprofundando. Finalmente, deepen(1) adiciona o nodo
      * 1 ao conjunto "current", e deepen(3) adiciona o 3.
-     * 
-     * Ou seja: ao entrar no nodo 4 vindo de algum outro lugar, as próximas
-     * transições efetuadas têm de ser pelos nodos 1 ou 3.
      *
      * advance é executado após a transição, para encontrar os "sucessores".
      * advance(1) redireciona para advance(2), que redireciona para 
@@ -407,8 +415,8 @@ buildComposition( TreeIterator root ) {
      * Detalhes sobre o comportamento em cada operador é encontrado abaixo.
      */
     deepen = [&]( TreeIterator iterator ) {
-        if( analyzed[iterator] ) return;
-        analyzed[iterator] = true;
+        if( deepened[iterator] ) return;
+        deepened[iterator] = true;
         if( !iterator || iterator->template is<Char>() ) {
             current.insert( iterator );
             return;
@@ -459,12 +467,15 @@ buildComposition( TreeIterator root ) {
                 deepen( iterator.rightChild() );
                 return;
 
-            default: throw token_error( "Unsupported operator" );
+            default:
+                /* Apenas para silenciar o warning.
+                 * Qualquer operador não suportado será detectado
+                 * em buildNodeList. */;
         }
     }; // fim deepen
     advance = [&]( TreeIterator iterator ) {
-        if( analyzed[iterator] ) return;
-        analyzed[iterator] = true;
+        if( advanced[iterator] ) return;
+        advanced[iterator] = true;
         if( !iterator ) {
             // Chegamos ao fim da árvore.
             current.insert( nullptr );
@@ -517,10 +528,11 @@ buildComposition( TreeIterator root ) {
                     iterator = iterator.rightChild();
                 while( *iterator == Operator::Concatenation ||
                        *iterator == Operator::VerticalBar );
-                advance( iterator );
+                advance( iterator.rightChild() );
                 return;
 
-            default: throw token_error( "Unsupported operator" );
+            default:
+                ;
         }
     }; // fim advance
 
