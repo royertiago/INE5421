@@ -1,0 +1,166 @@
+systemInfo.txt
+Visão geral do sistema.
+
+
+    Visão geral do sistema
+
+O programa construído implementa os algoritmos
+relacionados a conjuntos regulares, representados 
+por autômatos finitos, gramáticas regulares e
+expressões regulares.
+
+A diretriz principal de modelagem foi manter correspondência
+com as definições e algoritmos da teoria da computação,
+em detrimento da eficiência.
+
+As quatro estruturas principais do programa são:
+    Grammar, em grammar/grammar.h
+    DFA, em automaton/deterministic.h
+    NFA, em automaton/nonDeterministic.h
+    NFAe, em automaton/nonDeterministicWithEpsilon.h
+
+Todas estas estruturas estão templatizadas para estado e
+alfabeto (ou nâo terminal e terminal, no caso da 
+gramática), e vários algoritmos usam desta parametrização.
+
+Os autômatos possuem um conjunto de estados, um alfabeto,
+a função de transição, estado inicial e estados finais
+em sua composição. Os algoritmos construídos precisam
+manter consistência destas estruturas e assumem esta
+consistência na execução.
+
+
+    Operadores aceitos e conversão de expressões regulares
+
+Além dos três operadores padrão das expressões regulares
+(união, concatenação e fechamento), três operadores
+derivados são aceitos pelos algoritmos que traduzem 
+expressões regulares para autômatos: opcional (?), fecho
+positivo (+) e o operador libra (representado por ':').
+(O operador libra é chamado de "SigmaOperator" pelo simples
+desconhecimento do nome em inglês deste operador.)
+
+Dois algoritmos foram implementados para a conversão de
+expressões regulares para autômatos finitos: algoritmo
+de Thompson e algoritmo de De Simone.
+
+Ambos recebem como entrada uma árvore de expressão.
+O parser implementado é descente recursivo. Ele passa a
+cadeia de entrada num tokenizador, que trata de detalhes
+como "\+", que é para ser interpretado como um caractere
+e não como operador de fechamento.
+Devido ao fato de a concatenação poder ser implícita, o
+tokenizador ignora todos os operadores de concatenação
+da entrada e os insere novamente depois, então o algoritmo
+aceita algumas expressões que estão sintaticamente
+incorretas, como "a...b".
+
+O algoritmo de Thompson converte a árvore de expressão
+para autômatos finitos não determinísticos com transições
+épsilon, que deve ser determinizado e minimizado
+posteriormente. O algoritmo de De Simone converte
+diretamente para autômato finito determinístico, 
+entretanto, uma etapa de préprocessamento é necessária para
+remover épsilons e operadores libra da árvore.
+
+
+    Determinização e minimização
+
+A determinização de autômatos finitos é tratada como uma
+conversão de representações de conjuntos regulares.
+O cabeçalho conversion.h contém 16 funções de conversão.
+
+São quatro representações tratadas neste cabeçalho:
+os três tipos de autômato e gramáticas. Existem funções
+de conversão de qualquer tipo para qualquer tipo neste
+cabeçalho.
+
+Todas as funções de conversão para autômato finito
+determinístico são nomeadas "toDFA()", e a sobrecarga de
+funções é utilizada para manter todas as conversões para
+autômato finito determinĩstico com este mesmo nome.
+Por completude, conversão de um tipo para ele mesmo também
+é suportado.
+
+Aqui temos uma das vantagens da parametrização de tipo
+(templatização) das classes do programa. A função toDFA
+que converte NFA para DFA retorna um autômato cujo tipo
+do estado é conjunto de estados do NFA; esta é uma
+representação natural da construção do conjunto das partes.
+
+A única função de minimização criada foi a de minimização
+de autômatos finitos determinísticos, que implementa o
+algoritmo visto em aula.
+
+
+    Classe Function
+
+Na definição dos autômatos finitos, existe o conceito
+de função. Esta função é manipulada pelos algoritmos,
+então sentiu-se a necessidade de ter uma classe apenas
+para este conceito.
+
+Na biblioteca parão do C++ existe a classe std::map, que
+abrange muito da funcionalidade desta classe; entretanto,
+algumas operações (como aplicar uma função a um conjunto)
+não estão disponíveis neste contêiner. Function, portanto,
+encapsula um std::map e dá a esta classe a funcionalidade
+necessária.
+
+
+    Clase Epsilon
+
+Esta classe representa o épsilon no programa. Embora
+na entrada de dados o épsilon ser representado pelo
+caractere '&', conceitualmente falando ele não é um
+caractere, mas sim uma cadeia de caracteres: "", a cadeia
+vazia. Em vista da diretriz de aproximar-se da definição
+matemática, o épsilon foi tratado como um conceito separado
+do conceito de caractere, possuindo uma classe exclusiva.
+
+Uma modelagem melhor seria definir o conceito de cadeia
+de caracteres separadamente e tomar o épsilon como uma
+instância desta classe.
+
+
+    Classe Either
+
+Esta classe foi criada para representar a possibilidade
+de usar elementos de domìnios heterogêneos num mesmo lugar.
+O primeiro uso é na definição do autômato não determinístico
+com transições épsilon. A função de mapeamento mapeia
+um par (q, a), em que q é um estado e a pode ser ou um
+símbolo do alfabeto ou épsilon - Either<Symbol, Epsilon>.
+Outro ponto de uso é nas árvores das expressões regulares.
+Cada nó contém um caractere, um operador ou épsilon:
+Either<Char, Epsilon, Operator>.
+
+Tecnicamente, Eiter é uma união discriminada - uma classe
+que encapsula uma união (union, do C) e algum indicador,
+que diz qual o tipo atual do objeto (discrimina a variável).
+Existem vários artigos que descrevem técnicas de
+implementação de uma união discriminada. Dentre as
+implementações disponíveis, temos Boost.Variant, que
+fornece as funcionalidades necessárias, entretanto, a
+título de aprendizado, uma classe Either foi criada usando
+as ferramentas do C++11.
+
+
+    Classe BinaryTree
+
+Esta classe também foi criada a título de aprendizado,
+assim como Either. Entretanto, nenhuma implementação
+de uma árvore binária genérica foi usada de referência
+para esta classe.
+
+O objetivo desta classe é aplicar o princípio da separação
+entre a representação dos dados e os algoritmos que 
+trabalham com eles. Pra atingir isto, é usado o conceito
+de iterador, importado das listas. O cabeçalho 
+algorithm/trees.h apresenta dois algoritmos que trabalham
+com iteradores de árvores: costurar uma árvore e copiar
+subárvores. O iterador da árvore binária construída, 
+entretanto, é capaz de efetuar muitas operações na árvore.
+Algumas destas operações deveriam ser implementadas como
+algoritmos separados, assim como os algoritmos de cópia
+e costura.
