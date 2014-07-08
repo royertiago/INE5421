@@ -191,7 +191,7 @@ void print( const std::set< EitherIterator >& set ) {
         if( iterator )
             printf( "%s(%d,%s)", str, iterator.rawIndex(), tostr(*iterator) );
         else
-            printf( "(null)%s", str );
+            printf( "%s(null)", str );
         str = " ";
     }
 }

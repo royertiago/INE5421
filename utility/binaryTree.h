@@ -153,9 +153,11 @@ public:
          * os iteradores são assumidos pertencerem à mesma árvore,
          * e iteradores nulos são considerados menores que não-nulos. */
         friend bool operator<( const iterator& lhs, const iterator& rhs ) {
-            if( !rhs ) return false;
-            if( !lhs ) return true;
-            return lhs.index < rhs.index;
+            return lhs.index + 1 < rhs.index + 1;
+        }
+
+        friend bool operator==( const iterator& lhs, const iterator& rhs ) {
+            return lhs.index == rhs.index;
         }
     };
 

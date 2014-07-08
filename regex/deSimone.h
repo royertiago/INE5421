@@ -120,7 +120,9 @@ buildComposition( TreeIterator root );
 template<
         typename TreeIterator,
         typename Char = typename extract_head_type<
-                    decltype(*std::declval<TreeIterator>())
+                            typename unqualified<
+                        decltype(*std::declval<TreeIterator>())
+                    >::type
                 >::type
         >
 DFA< std::set< TreeIterator >, Char >
@@ -145,9 +147,9 @@ DFA< int, Char > deSimone( BinaryTree<Either<Char, Epsilon, Operator>> tree ) {
                  /* Q_0*/    0
         };
     addRightThreads( tree.root() );
-    return compaction(
+    return compact(
                 buildAutomaton(
-                    forwardCompositions(
+                    buildComposition(
                         tree.root()
                     )
                 )
@@ -172,8 +174,8 @@ void removeSigmaClosure( BinaryTree< Either<Char, Epsilon, Operator> >& tree )
  *   x   y    x   y   x   *  x   *   x   *
  *                       /      /       /
  *                      y      .       .
- *                              \     / \
- *                               y   x   y
+ *                            /       / \
+ *                           y       y   x
  */
 template< typename TreeIterator >
 void removeSigmaClosure( TreeIterator iterator ) {
@@ -199,10 +201,10 @@ void removeSigmaClosure( TreeIterator iterator ) {
             *iterator = Operator::KleneeClosure; // Etapa 2
 
             iterator = iterator.leftChild();
-            iterator.leftAscent();
+            iterator.rightAscent();
             *iterator = Operator::Concatenation; // Etapa 3
 
-            copySubtree( lhs, iterator.makeLeftChild() ); // Etapa 4
+            copySubtree( lhs, iterator.makeRightChild() ); // Etapa 4
 
             removeSigmaClosure( iterator.leftChild() );
             removeSigmaClosure( iterator.rightChild() );
@@ -548,5 +550,56 @@ buildComposition( TreeIterator root ) {
     }
     deepen( root ); // Obter a composição inicial
     return {current, map};
+}
+
+
+template< typename TreeIterator, typename Char >
+DFA< std::set< TreeIterator >, Char >
+buildAutomaton(
+        std::pair<
+            std::set< TreeIterator >,
+            std::map< TreeIterator, std::set< TreeIterator > >
+        > pair
+    )
+{
+    typedef std::set< TreeIterator > State;
+
+    std::map< TreeIterator, State > & map = pair.second;
+    DFA< State, Char > dfa;
+
+    std::set< State > queue;
+    auto enqueue = [&]( State q ) {
+        if( dfa.states.count( q ) == 0 )
+            queue.insert( q );
+    };
+    auto dequeue = [&]() -> State {
+        State q = *queue.begin();
+        queue.erase( queue.begin() );
+        return q;
+    };
+    auto mergeTransition = [&]( State q, Char c, State r ) {
+        State s;
+        if( dfa.delta.onDomain({q, c}) )
+            s = dfa.delta({q, c});
+        s.insert( r.begin(), r.end() );
+        dfa.delta.insert( {q, c}, s );
+        dfa.alphabet.insert( c );
+    };
+
+    dfa.initialState = pair.first;
+    enqueue( pair.first );
+    while( !queue.empty() ) {
+        State q = dequeue();
+        dfa.states.insert( q );
+        for( TreeIterator t : q )
+            if( t ) { // t != null
+                mergeTransition( q, *t, map[t] );
+                enqueue( map[t] );
+            }
+            else
+                dfa.finalStates.insert( q );
+    }
+
+    return dfa;
 }
 #endif // DE_SIMONE_H

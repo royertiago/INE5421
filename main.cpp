@@ -286,5 +286,17 @@ int main () {
     addRightThreads( tree.root() );
     pair = buildComposition( tree.root() );
     print( pair );
+
+    str = "ab*c";
+    printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
+    print( deSimone( parse(str) ) );
+
+    str = "(a|b)c*";
+    printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
+    print( deSimone( parse(str) ) );
+
+    str = "ab*c:d";
+    printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
+    print( deSimone( parse( str ) ) );
     return 0;
 }
