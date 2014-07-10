@@ -14,13 +14,7 @@ struct NFA {
     std::set< Symbol > alphabet;
     // Função de transição
     Math::Function< std::pair<State, Symbol>, std::set<State> > delta;
-    std::set< State > finalStates;
     State initialState;
-
-    /* Determina se o autômato aceita ou não a palavra delimitada
-     * pelo intervalo [begin, end). */
-    template< typename ForwardIterator >
-    bool accepts( ForwardIterator begin, ForwardIterator end );
+    std::set< State > finalStates;
 };
-
 #endif // NON_DETERMINISTIC_H

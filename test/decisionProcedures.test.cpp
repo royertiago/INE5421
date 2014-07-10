@@ -12,8 +12,8 @@ DECLARE_TEST( DecisionProceduresTest ) {
                              { {{0, 'a'}, 0},
                                {{0, 'b'}, 1},
                              },
-                             {1},
-                             0
+                             0,
+                             {1}
     }; // a*b
     DFA< int, char > amb = { {0, 1, 2},
                              {'a', 'b'},
@@ -21,8 +21,8 @@ DECLARE_TEST( DecisionProceduresTest ) {
                                {{1, 'a'}, 1},
                                {{1, 'b'}, 2}
                              },
-                             {2},
-                             0
+                             0,
+                             {2}
     }; // a+b
     DFA< int, char > ambIb = { {0, 1, 2},
                                {'a', 'b'},
@@ -31,16 +31,16 @@ DECLARE_TEST( DecisionProceduresTest ) {
                                  {{1, 'a'}, 1},
                                  {{1, 'b'}, 2}
                                },
-                               {2},
-                               0
+                               0,
+                               {2}
     }; // a+b|b
     DFA< int, char > bxa = { {0, 1},
                              {'a', 'b'},
                              { {{0, 'b'}, 0},
                                {{0, 'a'}, 1},
                              },
-                             {1},
-                             0
+                             0,
+                             {1}
     }; // b*a
     DFA< int, char > bma = { {0, 1, 2},
                              {'a', 'b'},
@@ -48,22 +48,22 @@ DECLARE_TEST( DecisionProceduresTest ) {
                                {{1, 'b'}, 1},
                                {{1, 'a'}, 2}
                              },
-                             {2},
-                             0
+                             0,
+                             {2}
     }; // b+a
     DFA< int, char > a = { {0, 1},
                            {'a'},
                            { {{0, 'a'}, 1}
                            },
-                           {1},
-                           0
+                           0,
+                           {1}
     }; // b
     DFA< int, char > n = { {0, 1},
                            {'b'},
                            { {{0, 'b'}, 1}
                            },
-                           {},
-                           0
+                           0,
+                           {}
     }; // null automaton
 
     b &= Test::TEST_EQUALS( equivalent( axb, ambIb ), true );

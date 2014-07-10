@@ -29,8 +29,8 @@ int main () {
                                             {{2, '0'}, {2}   },
                                             {{2, '1'}, {2}   }
                                           },
-                             /*Finais  */ {2},
-                             /*Inicial */ 0
+                             /*Inicial */ 0,
+                             /*Finais  */ {2}
     };
     printf( "Sample automaton:\n" );
     print( nfa );
@@ -57,8 +57,8 @@ int main () {
                                               {{2, 'c'    }, {2}},
                                               {{2, epsilon}, {1}}
                                             },
-                               /*Finais  */ {2},
-                               /*Inicial */ 0
+                               /*Inicial */ 0,
+                               /*Finais  */ {2}
     };
     printf( "\nSample NFA with epsilon:\n" );
     print( nfae );
@@ -96,7 +96,7 @@ int main () {
                               {{2, '0'}, 1},
                               {{2, '1'}, 2}
                             },
-                            {0}, 0};
+                            0, {0}};
     print( m3 );
     DFA< int, char > m2 = { {0, 1},
                             {'0', '1'},
@@ -105,7 +105,7 @@ int main () {
                               {{1, '0'}, 0},
                               {{1, '1'}, 1}
                             },
-                            {0}, 0};
+                            0, {0}};
     print( m2 );
     printf( "\nUnion:\n" );
     print( automataUnion( m2, m3 ) );
@@ -156,8 +156,8 @@ int main () {
                                 { {7, '1'}, 2},
                                 { {7, '0'}, 6}
                               },
-                              { 2 },
-                              0
+                              0,
+                              { 2 }
     };
     printf( "\nAutomaton from Hopcroft, pg 68, and minimized:\n" );
     print( test );

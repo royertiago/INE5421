@@ -104,8 +104,8 @@ NFAe< int, Char > nfaeTo( Char c ) {
              /* Sigma */{c},
              /* delta */{ { {0, c}, {1} } 
                         },
-             /* F */    {1},
-             /* Q_0 */  0
+             /* Q_0 */  0,
+             /* F */    {1}
     };
 }
 
@@ -115,8 +115,8 @@ NFAe< int, Char > nfaeTo( Epsilon ) {
              /* Sigma */{},
              /* delta */{ { {0, epsilon}, {1} } 
                         },
-             /* F */    {1},
-             /* Q_0 */  0
+             /* Q_0 */  0,
+             /* F */    {1}
     };
 }
 

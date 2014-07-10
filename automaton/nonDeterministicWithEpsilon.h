@@ -19,8 +19,8 @@ struct NFAe {
                     std::set<State>
                   > delta;
 
-    std::set< State > finalStates;
     State initialState;
+    std::set< State > finalStates;
 
     /* Determina o fecho-épsilon do estado passado.
      *
@@ -28,11 +28,6 @@ struct NFAe {
      * a partir do estado apenas por transições-épsilon.
      * Note que um estado sempre pertencerá ao seu fecho-épsilon. */
     std::set< State > epsilonClosure( State ) const;
-
-    /* Determina se o autômato aceita ou não a palavra delimitada
-     * pelo intervalo [begin, end). */
-    template< typename ForwardIterator >
-    bool accepts( ForwardIterator begin, ForwardIterator end );
 
     /* Adiciona a transição do estado from para o estado to via s.
      * Nada é feito caso a transição já exista.

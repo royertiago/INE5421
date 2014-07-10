@@ -18,8 +18,8 @@ struct DFA {
     std::set< Symbol > alphabet;
     // Função de transição
     Math::Function< std::pair<State, Symbol>, State > delta;
-    std::set< State > finalStates;
     State initialState;
+    std::set< State > finalStates;
 
     /* Determina se o autômato aceita ou não a palavra delimitada
      * pelo intervalo [begin, end). */

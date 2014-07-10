@@ -143,8 +143,8 @@ DFA< int, Char > deSimone( BinaryTree<Either<Char, Epsilon, Operator>> tree ) {
         return { /* Q */     {0},
                  /* Sigma */ {},
                  /* Delta */ {},
-                 /* F */     {0},
-                 /* Q_0*/    0
+                 /* Q_0*/    0,
+                 /* F */     {0}
         };
     addRightThreads( tree.root() );
     return compact(
