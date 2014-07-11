@@ -20,6 +20,10 @@ public:
      * não por contêiner. */
     range( Iterator begin, Iterator end );
 
+    /* Informa se  intervalo é vazio; isto é, se os iteradores
+     * são iguais. */
+    bool empty() const;
+
     Iterator begin() const;
     Iterator end() const;
 };
@@ -31,6 +35,11 @@ range< Iterator >::range( Iterator b, Iterator e ) :
     b( b ),
     e( e )
 {}
+
+template< typename Iterator >
+bool range< Iterator >::empty() const {
+    return b == e;
+}
 
 template< typename Iterator >
 Iterator range<Iterator>::begin() const {

@@ -16,6 +16,7 @@
 #include <vector>
 #include <set>
 #include "production.h"
+#include "algorithm/range.h"
 #include "utility/either.h"
 
 template< typename NonTerminal, typename Terminal >
@@ -27,6 +28,13 @@ struct Grammar {
 
     bool isNonTerminal( const Either<NonTerminal, Terminal>& ) const;
     bool isTerminal( const Either<NonTerminal, Terminal>& ) const;
+
+    /* Retorna o intervalo que contém todas as produções
+     * cujo lado esquerdo é o não-terminal passado. */
+    range< typename std::set< 
+                Production<NonTerminal, Terminal>
+            >::const_iterator >
+        productionsFrom( NonTerminal ) const;
 };
 
 // Implementação
@@ -44,4 +52,31 @@ bool Grammar< NonTerminal, Terminal >::isTerminal(
     return a.template is<Terminal>() && terminals.count( a ) > 0;
 }
 
+template< typename NonTerminal, typename Terminal >
+range< typename std::set< 
+            Production<NonTerminal, Terminal>
+        >::const_iterator >
+Grammar< NonTerminal, Terminal >::productionsFrom( NonTerminal N ) const
+{
+    // TODO: ineficiente...
+    typedef typename std::set< 
+                Production<NonTerminal, Terminal>
+            >::const_iterator iterator;
+
+    iterator begin = productions.begin();
+    iterator end = productions.end();
+    iterator i = begin;
+    for( ; i != end; ++i )
+        if( i->left == N ) {
+            begin = i;
+            break;
+        }
+    for( ; i != end; ++i )
+        if( i->left != N ) {
+            end = i;
+            break;
+        }
+
+    return range<iterator>( begin, end );
+}
 #endif // GRAMMAR_H
