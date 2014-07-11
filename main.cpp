@@ -298,5 +298,9 @@ int main () {
     str = "ab*c:d";
     printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
     print( deSimone( parse( str ) ) );
+
+    str = "ab|ac";
+    printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
+    print( deSimone( parse( str ) ) );
     return 0;
 }

@@ -562,11 +562,14 @@ buildAutomaton(
         > pair
     )
 {
+    // Conveniência
     typedef std::set< TreeIterator > State;
-
     std::map< TreeIterator, State > & map = pair.second;
     DFA< State, Char > dfa;
 
+    /* Estas duas funções controlam quais estados já foram processados.
+     * Como precisamos processar cada estado apenas uma vez, usaremos
+     * um std::set como fila. */
     std::set< State > queue;
     auto enqueue = [&]( State q ) {
         if( dfa.states.count( q ) == 0 )
@@ -577,6 +580,18 @@ buildAutomaton(
         queue.erase( queue.begin() );
         return q;
     };
+
+    /* Adiciona na "fila" todos os estados alcançáveis a partir
+     * deste com apenas uma transição. */
+    auto enqueueDescendents = [&]( State q ) {
+        for( Char c : dfa.alphabet )
+            if( dfa.delta.onDomain({q, c}) )
+                enqueue( dfa.delta({q, c}) );
+    };
+
+    /* State é um conjunto, que representa a composição do estado.
+     * Esta função une o conjunto passado ao conjunto que é o
+     * alvo atual da transição. */
     auto mergeTransition = [&]( State q, Char c, State r ) {
         State s;
         if( dfa.delta.onDomain({q, c}) )
@@ -588,16 +603,37 @@ buildAutomaton(
 
     dfa.initialState = pair.first;
     enqueue( pair.first );
+
+    /* A composição de um estado representa todas as possíveis próximas
+     * transições daquele estado. Começamos enfileirando o estado inicial.
+     *
+     * A cada passo, escolhemos um novo estado a ser adicionado.
+     * Devido ao controle de enqueue/dequeue, sabemos que este estado está
+     * sendo processado pela primeira vez.
+     * Ao transitar por um caractere do conjunto, temos de considerar todas
+     * as possíveis próximas transições por aquele caractere (porque a
+     * transição seguinte pode ser por qualquer uma delas). O estado de
+     * destino é a união das composições das transições por aquele caractere
+     * a partir daquele estado.
+     *
+     * Implementamos isso percorrendo todo o conjunto atual e unindo os
+     * conjuntos conforme os encontramos. Depois, basta percorrer todas
+     * as transições novamente e enfileirar os estados que acabaram de ser
+     * adicionados.
+     *
+     * Também temos de controlar os iteradores nulos: eles representam o
+     * fato de que o estado atual pode alcançar o fim da árvore.
+     * Portanto, inserimos o estado atual na lista de estados terminais. */
     while( !queue.empty() ) {
         State q = dequeue();
         dfa.states.insert( q );
         for( TreeIterator t : q )
-            if( t ) { // t != null
+            if( t ) // t != null
                 mergeTransition( q, *t, map[t] );
-                enqueue( map[t] );
-            }
             else
                 dfa.finalStates.insert( q );
+
+        enqueueDescendents( q );
     }
 
     return dfa;
