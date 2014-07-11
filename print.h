@@ -23,6 +23,7 @@ void print( const DFA< std::set<int>, char >& );
 void print( const DFA< std::pair<int, int>, char >& );
 void print( const NFA< int, char >& );
 void print( const NFAe< int, char >& );
+void print( const Grammar< char, char >& );
 void print( const Grammar< int, char >& );
 void print( const TokenVector< char >& );
 void print( const BinaryTree<Either<char, Epsilon, Operator>>& );

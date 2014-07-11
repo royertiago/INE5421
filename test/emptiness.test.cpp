@@ -2,6 +2,7 @@
  * Teste de unidade para a função que testa vacuidade em
  * linguagens livres de contexto. */
 
+#include "print.h"
 #include "emptiness.h"
 #include "test/lib/test.h"
 
@@ -62,7 +63,7 @@ DECLARE_TEST( EmptinessTest ) {
                                              {1, {0, 0} },
                                              {2, {0, 'a', 2} },
                                              {2, {1, 'a', 2} }
-                                      },
+                                            },
                                 /* S = */ 0 };
     b &= Test::TEST_EQUALS( isEmpty( g4 ), false );
 
@@ -74,6 +75,18 @@ DECLARE_TEST( EmptinessTest ) {
       
     g4.productions.erase( {1, {0, 0}} );
     b &= Test::TEST_EQUALS( isEmpty( g4 ), true );
+
+    Grammar< int, char > g5 = { /* Vn */ {0, 1},
+                                /* Vt */ {'a'},
+                                /* P  */ { {0, {'a'} },
+                                           {1, {'a'} },
+                                         },
+                                /* S  */ 0 };
+
+    b &= Test::TEST_EQUALS( isEmpty( g5 ), false );
+    
+    g5.erase( 0 );
+    b &= Test::TEST_EQUALS( isEmpty( g5 ), true );
 
     return b;
 }

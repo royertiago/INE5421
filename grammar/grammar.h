@@ -35,6 +35,13 @@ struct Grammar {
                 Production<NonTerminal, Terminal>
             >::const_iterator >
         productionsFrom( NonTerminal ) const;
+
+    /* Apaga todas as produções cujo lado esquerdo seja o não-terminal
+     * passado. Caso este não-terminal não seja o símbolo inicial, ele
+     * também é removido do conjunto de não-terminais.
+     *
+     * Este método não organiza o conjunto de símbolos terminais. */
+    void erase( NonTerminal );
 };
 
 // Implementação
@@ -56,27 +63,35 @@ template< typename NonTerminal, typename Terminal >
 range< typename std::set< 
             Production<NonTerminal, Terminal>
         >::const_iterator >
-Grammar< NonTerminal, Terminal >::productionsFrom( NonTerminal N ) const
+Grammar< NonTerminal, Terminal >::productionsFrom( NonTerminal n ) const
 {
     // TODO: ineficiente...
     typedef typename std::set< 
                 Production<NonTerminal, Terminal>
             >::const_iterator iterator;
 
-    iterator begin = productions.begin();
+    iterator begin = productions.end();
     iterator end = productions.end();
-    iterator i = begin;
+    iterator i = productions.begin();
     for( ; i != end; ++i )
-        if( i->left == N ) {
+        if( i->left == n ) {
             begin = i;
             break;
         }
     for( ; i != end; ++i )
-        if( i->left != N ) {
+        if( i->left != n ) {
             end = i;
             break;
         }
 
     return range<iterator>( begin, end );
+}
+
+template< typename NonTerminal, typename Terminal >
+void Grammar< NonTerminal, Terminal >::erase( NonTerminal n ) {
+    auto range = productionsFrom( n );
+    productions.erase( range.begin(), range.end() );
+    if( n != startSymbol )
+        nonTerminals.erase( n );
 }
 #endif // GRAMMAR_H

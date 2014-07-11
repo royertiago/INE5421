@@ -120,17 +120,39 @@ void printRightSide( const Production< int, char >& p ) {
     }
 }
 
+void printRightSide( const Production< char, char >& p ) {
+    for( auto& either : p.right )
+        printf( "%c", either.getAs<char>() );
+}
+
+void print( const Grammar< char, char >& g ) {
+    printf( "Start symbol: %c\n", g.startSymbol );
+    const char * offset = "P = {";
+
+    for( char nonTerminal : g.nonTerminals ) {
+        auto range = g.productionsFrom( nonTerminal );
+        if( range.empty() ) continue;
+
+        printf( "%s%c -> ", offset, nonTerminal ); offset = "     ";
+        const char * space = "";
+        for( const auto& production : range ) {
+            printf( "%s", space ); space = " | ";
+            printRightSide( production );
+        }
+        printf( "\n" );
+    }
+    printf( "}\n" );
+}
+
 void print( const Grammar< int, char >& g ) {
     printf( "Start symbol: %d\n", g.startSymbol );
     const char * offset = "P = {";
 
     for( char nonTerminal : g.nonTerminals ) {
-        printf( "%s", offset ); offset = "     ";
-
         auto range = g.productionsFrom( nonTerminal );
         if( range.empty() ) continue;
 
-        printf( "%d -> ", nonTerminal );
+        printf( "%s%d -> ", offset, nonTerminal ); offset = "     ";
         const char * space = "";
         for( const auto& production : range ) {
             printf( "%s", space ); space = " | ";
