@@ -302,5 +302,40 @@ int main () {
     str = "ab|ac";
     printf( "\nAutomaton for %s (via De Simone Algorithm)\n", str.c_str() );
     print( deSimone( parse( str ) ) );
+
+    Grammar< char, char > g1 = { {'S', 'A', 'B', 'C', 'D'},
+                                 {'a', 'b', 'c', 'd'},
+                                 { {'S', {'a', 'S', 'a'} },
+                                   {'S', {'d', 'D', 'd'} },
+                                   {'A', {'a', 'B'} },
+                                   {'A', {'C', 'c'} },
+                                   {'A', {'a'} },
+                                   {'B', {'d', 'D'} },
+                                   {'B', {'b', 'B'} },
+                                   {'B', {'b'} },
+                                   {'C', {'A', 'a'} },
+                                   {'C', {'d', 'D'} },
+                                   {'C', {'c'} },
+                                   {'D', {'b', 'b', 'B'} },
+                                   {'D', {'d'} }
+                                 },
+                                 'S'
+    };
+    /* Objetivo:
+       GrammarParser p( "->", "|", isSpace, isSpace );
+       g1 = parse({ "S -> aSa | dDd",
+                    "A->aB|Cc|a",
+                    "B->dD|bB|b",
+                    "  C -> A a | d D | c  ",
+                    "  D -> b b B | d "
+                 });
+     */
+    printf( "Sample grammar:\n" );
+    print( g1 );
+
+    printf( "Without unreachable symbols:\n" );
+    print( removeUnreachable( g1 ) );
+
+
     return 0;
 }

@@ -12,6 +12,12 @@
 template< typename NonTerminal, typename Terminal >
 Grammar<NonTerminal, Terminal> removeDead( Grammar<NonTerminal, Terminal> );
 
+/* Remove os não-terminais inalcançáveis da gramática, a partir
+ * do símbolo inicial. */
+template< typename NonTerminal, typename Terminal >
+Grammar<NonTerminal, Terminal> removeUnreachable(
+        Grammar<NonTerminal, Terminal> );
+
 
 // Implementação
 template< typename NonTerminal, typename Terminal >
@@ -75,5 +81,45 @@ Grammar<NonTerminal, Terminal> removeDead( Grammar<NonTerminal, Terminal> g )
 
     return g;
 }
+
+template< typename NonTerminal, typename Terminal >
+Grammar<NonTerminal, Terminal> removeUnreachable(
+        Grammar<NonTerminal, Terminal> g )
+{
+    std::map< NonTerminal, bool> reachable;
+    for( auto t : g.nonTerminals )
+        reachable[t] = false;
+
+    bool updatedLastIteration;
+
+    /* markReachable( t ) marcará como alcançável o objeto passado,
+     * caso seja um não-terminal da gramática. */
+    auto markReachable = [&]( Either<NonTerminal, Terminal> t ) {
+        if( g.isNonTerminal( t ) && !reachable[t] ) {
+            reachable[t] = true;
+            updatedLastIteration = true;
+        }
+    };
+
+    markReachable( g.startSymbol );
+    while( updatedLastIteration ) {
+        updatedLastIteration = false;
+        for( const auto& production : g.productions )
+            if( reachable[production.left] )
+                for( auto t : production.right )
+                    markReachable( t );
+    }
+
+    /* Agora removamos os inalcançáveis. */
+    for( auto it = g.nonTerminals.begin(); it != g.nonTerminals.end(); ) {
+        if( !reachable[*it] )
+            g.erase( *it++ );
+        else
+            ++it;
+    }
+
+    return g;
+}
+
 
 #endif // MANIPULATIONS_H
