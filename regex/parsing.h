@@ -5,20 +5,12 @@
 #ifndef PARSING_H
 #define PARSING_H
 
-#include <stdexcept>
 #include <vector>
 #include "epsilon.h"
+#include "exceptions.h"
 #include "regex/tokens.h"
 #include "utility/binaryTree.h"
 #include "utility/type_traits.h"
-
-/* Exceção lançada pelas funções de análise sintática caso
- * um erro sintático seja encontrado. */
-struct syntax_error : public std::runtime_error {
-    explicit syntax_error( const char * what ) :
-        runtime_error( what )
-    {}
-};
 
 /* Efetua o parsing de todo o conteúdo do contêiner passado.
  * Os elementos deste contêiner devem ser convertíveis para char.
@@ -26,7 +18,12 @@ struct syntax_error : public std::runtime_error {
  * O retorno é uma BinaryTree de Either<Char, Epsilon, Operator>,
  * em que Char é o tipo dos elementos do contêiner.
  *
- * Esta função simplesmente coordena o esforço das próximas funções. */
+ * Esta função simplesmente coordena o esforço das próximas funções.
+ *
+ * Exceção lançada:
+ *  syntax_error - erros de sintaxe, como parênteses desbalanceados
+ *                 e excesso de operadores (a|:b, por exemplo).
+ */
 template< typename Container >
 auto parse( const Container& c )
     -> BinaryTree<Either<

@@ -6,6 +6,7 @@
 #define THOMPSON_H
 
 #include "epsilon.h"
+#include "exceptions.h"
 #include "automaton/compaction.h"
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "regex/tokens.h"
@@ -17,7 +18,10 @@
  * autômato finito com transições-épsilon.
  *
  * As demais funções deste cabeçalho são auxiliares e coordenadas
- * por esta função. */
+ * por esta função. 
+ *
+ * Exceção lançada:
+ *  token_error - caso algum operador não reconhecido esteja na árvore. */
 template< typename Char >
 NFAe< int, Char > thompson( BinaryTree< Either<Char, Epsilon, Operator> > );
 

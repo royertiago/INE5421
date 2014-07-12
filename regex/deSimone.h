@@ -9,6 +9,7 @@
 #include <map>
 #include <utility>
 #include "epsilon.h"
+#include "exceptions.h"
 #include "algorithm/trees.h"
 #include "automaton/compaction.h"
 #include "automaton/deterministic.h"
@@ -21,7 +22,10 @@
  * segundo o método de De Simone.
  *
  * As demais funções deste cabeçalho são auxiliares e coordenadadas
- * por esta função. */
+ * por esta função. 
+ *
+ * Exceção lançada:
+ *  token_error - caso um operador não previsto seja encontrado. */
 template< typename Char >
 DFA< int, Char > deSimone( BinaryTree< Either<Char, Epsilon, Operator> > );
 
