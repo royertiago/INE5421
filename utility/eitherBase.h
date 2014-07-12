@@ -79,6 +79,12 @@ struct EitherBase< Head, Tail... > {
             new (&tail) EitherBase<Tail...>( std::move(e.tail), index - 1 );
     }
 
+    /* O destrutor desta classe faz nada.
+     *
+     * Ele existe apenas para que a classe seja utilizável se um dos tipos
+     * não possuir construtor trivial. */
+    ~EitherBase() {}
+
     /* Retorna o índice do tipo especificado.
      * 
      * A primeira função apenas redireciona para as outras duas, mas

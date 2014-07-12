@@ -5,6 +5,7 @@
 
 #include <algorithm> // sort
 #include <map>
+#include "test/mock/resource.h"
 #include <tuple>
 #include <vector>
 #include "test/lib/test.h"
@@ -20,6 +21,10 @@ bool eitherForwardTest( std::tuple<Either<int, char>> t, int i ) {
 
 Either<double, double, double> getEitherDouble() {
     return Either<double, double, double>( 3.5 );
+}
+
+Either< Resource, int > getEitherResource() {
+    return Resource( 23 );
 }
 
 } // anonymous namespace
@@ -293,5 +298,25 @@ DECLARE_TEST( EitherTest ) {
     for( auto it = wd.begin(), jt = vd.begin(); it != wd.end(); ++it, ++jt )
         b &= Test::TEST_EQUALS( *it == *jt, true );
 
+    // Teste com objetos complexos
+    {
+        Resource::reset();
+
+        Resource r( 17 );
+        Either< Resource, int > e = std::move( r );
+        b &= Test::TEST_EQUALS( Resource::copyCount(), 0 );
+
+        Either< Resource, int > f = 7;
+        f = std::move( e );
+        b &= Test::TEST_EQUALS( Resource::copyCount(), 0 );
+
+        Either< Resource, int > g = Resource::make();
+        b &= Test::TEST_EQUALS( Resource::copyCount(), 0 );
+
+        g = f = 7;
+        f = getEitherResource();
+        b &= Test::TEST_EQUALS( Resource::copyCount(), 0 );
+    }
+    b &= Test::TEST_EQUALS( Resource::aliveCount(), 0 );
     return b;
 }
