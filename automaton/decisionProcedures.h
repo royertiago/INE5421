@@ -2,8 +2,8 @@
  * Coleção de algoritmos que decidem problemas sobre linguagens
  * regulares, representadas como autômatos finitos determinísticos.
  */
-#ifndef DECISION_PROCEDURES_H
-#define DECISION_PROCEDURES_H
+#ifndef AUTOMATON_DECISION_PROCEDURES_H
+#define AUTOMATON_DECISION_PROCEDURES_H
 
 #include <map>
 #include <functional>
@@ -86,4 +86,4 @@ bool infinite( DFA< State, Symbol > dfa ) {
 
     return analyze( dfa.initialState );
 }
-#endif // DECISION_PROCEDURES_H
+#endif // AUTOMATON_DECISION_PROCEDURES_H

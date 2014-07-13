@@ -1,11 +1,11 @@
-/* decisionProcedures.test.cpp
+/* automatonDecisionProcedures.test.cpp
  * Teste de unidade para as funções de automaton/decisionProcedures.h
  */
 #include "automaton/decisionProcedures.h"
 
 #include "test/lib/test.h"
 
-DECLARE_TEST( DecisionProceduresTest ) {
+DECLARE_TEST( AutomatonDecisionProceduresTest ) {
     bool b = true;
     DFA< int, char > axb = { {0, 1},
                              {'a', 'b'},

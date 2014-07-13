@@ -3,7 +3,6 @@
 using std::printf;
 #include "acceptanceList.h"
 #include "conversion.h"
-#include "emptiness.h"
 #include "print.h"
 #include "automaton/closureProperties.h"
 #include "automaton/compaction.h"
@@ -12,6 +11,7 @@ using std::printf;
 #include "automaton/nonDeterministic.h"
 #include "automaton/nonDeterministicWithEpsilon.h"
 #include "grammar/grammar.h"
+#include "grammar/manipulations.h"
 #include "regex/deSimone.h"
 #include "regex/parsing.h"
 #include "regex/thompson.h"
