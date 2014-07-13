@@ -60,7 +60,7 @@ public:
 
         /* Constrói um iterador nulo.
          * Note que o construtor é implícito. */
-        iterator( nullptr_t );
+        iterator( std::nullptr_t );
 
         /* Retorna iteradores para os elementos especificados.
          * Caso não existam, um iterador apontando para o nodo nulo

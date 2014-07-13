@@ -230,7 +230,7 @@ bool removeEpsilon( TreeIterator iterator ) {
     if( !iterator->template is<Operator>() )
         return false;
 
-    switch( iterator->template operator Operator() ) {
+    switch( iterator->operator Operator() ) {
         case Operator::KleneeClosure:
         case Operator::PositiveClosure:
         case Operator::Optional:
@@ -335,7 +335,7 @@ buildComposition( TreeIterator root ) {
         [&]( TreeIterator iterator ) {
             nodeList.insert( iterator );
             if( iterator->template is<Operator>() )
-                switch( iterator->template operator Operator() ) {
+                switch( iterator->operator Operator() ) {
                     case Operator::Concatenation:
                     case Operator::VerticalBar:
                         buildNodeList( iterator.rightChild() );
@@ -428,7 +428,7 @@ buildComposition( TreeIterator root ) {
             return;
         }
 
-        switch( iterator->template operator Operator() ) {
+        switch( iterator->operator Operator() ) {
             case Operator::KleneeClosure:
                 /*       * ->
                  *     /
@@ -492,7 +492,7 @@ buildComposition( TreeIterator root ) {
             return;
         }
 
-        switch( iterator->template operator Operator() ) {
+        switch( iterator->operator Operator() ) {
             case Operator::KleneeClosure:
                 /*       * ->
                  *     /

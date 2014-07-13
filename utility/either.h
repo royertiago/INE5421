@@ -219,7 +219,7 @@ typename std::enable_if<
     >::type
 operator==( const Either<Ts...>& lhs, const T& rhs ) {
     if( lhs.template is<T>() )
-        return lhs.template operator T() == rhs;
+        return lhs.operator T() == rhs;
     return false;
 }
 

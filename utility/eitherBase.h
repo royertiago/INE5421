@@ -12,14 +12,12 @@
 #include "utility/type_traits.h"
 
 template< typename ... Ts >
-struct EitherBase;
+union EitherBase;
 
 template< typename Head, typename ... Tail >
-struct EitherBase< Head, Tail... > {
-    union {
-        Head head;
-        EitherBase< Tail... > tail;
-    };
+union EitherBase< Head, Tail... > {
+    Head head;
+    EitherBase< Tail... > tail;
 
     static_assert( !std::is_reference<Head>::value,
             "There is no support to references." );
@@ -176,7 +174,7 @@ struct EitherBase< Head, Tail... > {
 
 // Especialização para EitherBase<>
 template<>
-struct EitherBase<> {
+union EitherBase<> {
     template< typename T >
     EitherBase( T&& ) {
         static_assert( dependant_false<T>::value,

@@ -300,7 +300,7 @@ void buildUnary( TreeIterator     nodeIterator,
             throw syntax_error( "Unbalanced parentheses" );
     } 
     else if( currentToken->template is<Char>() )
-        *nodeIterator = currentToken->template operator Char();
+        *nodeIterator = currentToken->operator Char();
     else if( currentToken->template is<Epsilon>() )
         *nodeIterator = epsilon;
     else if( *currentToken == Parentheses::Right )
@@ -319,7 +319,7 @@ void buildUnary( TreeIterator     nodeIterator,
          )
     {
         nodeIterator.rightAscent();
-        *nodeIterator = currentToken->template operator Operator();
+        *nodeIterator = currentToken->operator Operator();
         ++currentToken;
     }
 }

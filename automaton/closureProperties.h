@@ -38,12 +38,15 @@ DFA< State, Symbol > complement( DFA< State, Symbol > );
 /* Constrói um autômato que executa os dois autômatos simultaneamente,
  * e aceita uma palavra w, e somente se, pred( M1 aceita w, M2 aceita w )
  * for verdadeiro.
- * Por exemplo, se pred(x, y) ==  x && y, temos a operação de interseção. */
-template< typename State1, typename State2, typename Symbol >
+ * Por exemplo, se pred(x, y) ==  x && y, temos a operação de interseção.
+ *
+ * Pred deve ser um tipo que pode ser chamado com dois booleanos e retorna
+ * um valor conversível implicitamente para booleano. */
+template< typename State1, typename State2, typename Symbol, typename Pred >
 DFA< std::pair<State1, State2>, Symbol > simultaneousRun( 
         DFA< State1, Symbol > M1, 
         DFA< State2, Symbol > M2, 
-        bool (* pred)(bool, bool) );
+        Pred pred );
 
 
 // Implementação
@@ -101,11 +104,11 @@ DFA< State, Symbol > complement( DFA< State, Symbol > dfa ) {
     return r;
 }
 
-template< typename State1, typename State2, typename Symbol >
+template< typename State1, typename State2, typename Symbol, typename Pred >
 DFA< std::pair<State1, State2>, Symbol > simultaneousRun( 
         DFA< State1, Symbol > M1, 
         DFA< State2, Symbol > M2, 
-        bool (* pred)(bool, bool) )
+        Pred pred )
 {
     /* Isto garante que todas as transições contendo qualquer
      * dos alfabetos seja realizada. */
