@@ -125,6 +125,11 @@ void printRightSide( const Production< char, char >& p ) {
         printf( "%c", either.getAs<char>() );
 }
 
+void printRightSide( const Production< std::string, std::string >& p ) {
+    for( auto& either : p.right )
+        printf( "%s ", either.getAs<std::string>().c_str() );
+}
+
 void print( const Grammar< char, char >& g ) {
     printf( "Start symbol: %c\n", g.startSymbol );
     const char * offset = "P = {";
@@ -156,6 +161,25 @@ void print( const Grammar< int, char >& g ) {
         const char * space = "";
         for( const auto& production : range ) {
             printf( "%s", space ); space = " | ";
+            printRightSide( production );
+        }
+        printf( "\n" );
+    }
+    printf( "}\n" );
+}
+
+void print( const Grammar< std::string, std::string >& g ) {
+    printf( "Start symbol: %s\n", g.startSymbol.c_str() );
+    const char * offset = "P = {";
+
+    for( auto nonTerminal : g.nonTerminals ) {
+        auto range = g.productionsFrom( nonTerminal );
+        if( range.empty() ) continue;
+
+        printf( "%s%s -> ", offset, nonTerminal.c_str() ); offset = "     ";
+        const char * space = "";
+        for( const auto& production : range ) {
+            printf( "%s", space ); space = "| ";
             printRightSide( production );
         }
         printf( "\n" );

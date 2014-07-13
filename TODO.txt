@@ -1,11 +1,9 @@
-Adicionar teste de unidade para conversões e compactação de autômatos.
-Testar construtores de cópia/movimento em Either.
-Testar tipos não-triviais em Either.
+Adicionar testes de unidade.
+Adicionar conversão de, por exemplo, Either< int, int > 
+    para Either< int, char >.
 Estilo de codificação não é regular com relação às assinaturas das funções,
     especialmente em regex/parsing.h
-Alterar BinaryTree::setLeftChild para alterar o pai do nodo filho após
-    alterar o filho do nodo pai.
 Refatorar utility/binaryTree.h para que os algoritmos sejam externos
     às classes. left/rightAscent/Collapse não deveriam estar chumbados
     como métodos do iterador.
-Implementar operator<( iterator, const_iterator ) e similares.
+Implementar operator<( BinaryTree::iterator, const_iterator ) e similares.

@@ -6,6 +6,7 @@
 #define PRINT_H
 
 #include <set>
+#include <string>
 #include <utility>
 #include "epsilon.h"
 #include "automaton/deterministic.h"
@@ -25,6 +26,7 @@ void print( const NFA< int, char >& );
 void print( const NFAe< int, char >& );
 void print( const Grammar< char, char >& );
 void print( const Grammar< int, char >& );
+void print( const Grammar< std::string, std::string >& );
 void print( const TokenVector< char >& );
 void print( const BinaryTree<Either<char, Epsilon, Operator>>& );
 void print( const std::set< EitherIterator >& );
